@@ -1,0 +1,6 @@
+{
+  "name": "StreamLay Plus",
+  "description": "StreamLay Plus - A modern, premium Video-on-Demand (VOD) and Live TV streaming web application.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
