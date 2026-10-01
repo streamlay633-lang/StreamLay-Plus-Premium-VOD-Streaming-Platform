@@ -22,6 +22,7 @@ export const HomeView: React.FC = () => {
   const trendingItems = MOCK_CONTENT.filter((c) => c.trending);
   const popularMovies = MOCK_CONTENT.filter((c) => c.type === 'movie' && (c.isPopular || c.score >= 8.5));
   const popularSeries = MOCK_CONTENT.filter((c) => c.type === 'series' && (c.isPopular || c.score >= 8.8));
+  const animeItems = MOCK_CONTENT.filter((c) => c.genres.includes('Anime') || c.genres.includes('Magical girl') || c.genres.includes('Idol'));
   const newReleases = MOCK_CONTENT.filter((c) => c.isNew || c.year === 2026);
   const recommendedItems = MOCK_CONTENT.filter((c) => c.score >= 8.6).slice(0, 8);
 
@@ -49,6 +50,15 @@ export const HomeView: React.FC = () => {
           subtitle="Most-watched titles across StreamLay Plus today"
           items={trendingItems}
         />
+
+        {/* Anime Spotlight */}
+        {animeItems.length > 0 && (
+          <ContentCarousel
+            title="Anime & Magical Idol Series"
+            subtitle="Virtual stages, magical transformations and sparkling music"
+            items={animeItems}
+          />
+        )}
 
         {/* Popular Movies */}
         <ContentCarousel

@@ -113,7 +113,7 @@ export const ContentDetailsView: React.FC = () => {
                 {selectedContent.score.toFixed(1)} IMDb
               </span>
               <span aria-hidden="true" className="text-slate-500">·</span>
-              <span>{selectedContent.year}</span>
+              <span>{selectedContent.releaseDate || selectedContent.year}</span>
               <span aria-hidden="true" className="text-slate-500">·</span>
               <span className="px-1.5 py-0.5 rounded bg-white/10 text-white text-xs border border-white/20">
                 {selectedContent.rating}
@@ -124,6 +124,21 @@ export const ContentDetailsView: React.FC = () => {
                   ? selectedContent.duration
                   : `${selectedContent.seasonsCount || 1} Season${(selectedContent.seasonsCount || 1) > 1 ? 's' : ''}`}
               </span>
+              {selectedContent.subtitles && selectedContent.subtitles.length > 0 && (
+                <>
+                  <span aria-hidden="true" className="text-slate-500">·</span>
+                  <span className="text-purple-300 font-medium">Sub: {selectedContent.subtitles.join(', ')}</span>
+                </>
+              )}
+              {selectedContent.serverName && (
+                <>
+                  <span aria-hidden="true" className="text-slate-500">·</span>
+                  <span className="inline-flex items-center gap-1.5 text-emerald-400 font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    {selectedContent.serverName}
+                  </span>
+                </>
+              )}
               {selectedContent.quality.map((q) => (
                 <span key={q} className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-purple-900/40 text-purple-300 text-[11px] font-semibold border border-purple-500/30">
                   {q}
@@ -185,8 +200,18 @@ export const ContentDetailsView: React.FC = () => {
                 <span className="text-slate-400 block mb-0.5">Genres</span>
                 <span className="font-semibold text-white">{selectedContent.genres.join(', ')}</span>
               </div>
+              {selectedContent.releaseDate && (
+                <div className="border-t border-white/5 pt-2.5">
+                  <span className="text-slate-400 block mb-0.5">Released Date</span>
+                  <span className="font-semibold text-white">{selectedContent.releaseDate}</span>
+                </div>
+              )}
               <div className="border-t border-white/5 pt-2.5">
-                <span className="text-slate-400 block mb-0.5">Director</span>
+                <span className="text-slate-400 block mb-0.5">Age Rating</span>
+                <span className="font-semibold text-white">{selectedContent.rating}</span>
+              </div>
+              <div className="border-t border-white/5 pt-2.5">
+                <span className="text-slate-400 block mb-0.5">Director / Studio</span>
                 <span className="font-semibold text-white">{selectedContent.director}</span>
               </div>
               <div className="border-t border-white/5 pt-2.5">
@@ -195,8 +220,22 @@ export const ContentDetailsView: React.FC = () => {
               </div>
               <div className="border-t border-white/5 pt-2.5">
                 <span className="text-slate-400 block mb-0.5">Audio & Subtitles</span>
-                <span className="font-semibold text-white">{selectedContent.language} · Dolby Atmos 5.1</span>
+                <span className="font-semibold text-white">
+                  {selectedContent.language}
+                  {selectedContent.subtitles && selectedContent.subtitles.length > 0
+                    ? ` · Sub: ${selectedContent.subtitles.join(', ')}`
+                    : ' · Dolby Atmos 5.1'}
+                </span>
               </div>
+              {selectedContent.serverName && (
+                <div className="border-t border-white/5 pt-2.5">
+                  <span className="text-slate-400 block mb-0.5">Streaming Server</span>
+                  <span className="inline-flex items-center gap-1.5 font-semibold text-purple-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    {selectedContent.serverName}
+                  </span>
+                </div>
+              )}
               <div className="border-t border-white/5 pt-2.5 flex items-center justify-between">
                 <span className="text-slate-400">Stream Quality</span>
                 <div className="flex gap-1">

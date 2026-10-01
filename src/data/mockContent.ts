@@ -2,6 +2,57 @@ import { ContentItem, LiveChannel } from '../types';
 
 export const MOCK_CONTENT: ContentItem[] = [
   {
+    id: 'onegai-aipri',
+    title: 'Onegai Aipri',
+    type: 'series',
+    description:
+      'At Private Paradime Academy, Himari Aozora longs to make 10,000 friends. When she stumbles upon the secret metaverse of AiPri Verse, she and her best friend Mitsuki transform into dazzling idols.',
+    longDescription:
+      'Welcome to Private Paradime Academy, a prestigious boarding school where dreams come alive! First-year student Himari Aozora arrives with a heartfelt dream to connect with everyone and make 10,000 friends. However, her world turns magical when she discovers the secret virtual gateway to AiPri Verse—an enchanting idol paradise accessible only through special AiPri cards and bracelets. Alongside her calm, collected roommate Mitsuki Hoshikawa, Himari steps onto the radiant live stage to debut as an AiPri idol, balancing secret sparkling performances, glamorous fashion coords, and daily school life.',
+    backdropUrl: 'https://migabviadyfvzqgjtfom.supabase.co/storage/v1/object/public/TV%20Series/Onegai%20Aipri/Backdrop/Onegai%20Aipri%20-%20Backdrop.png',
+    posterUrl: 'https://migabviadyfvzqgjtfom.supabase.co/storage/v1/object/public/TV%20Series/Onegai%20Aipri/Poster/Onegai%20Aipri%20-%20Poster.jpg',
+    logoUrl: 'https://migabviadyfvzqgjtfom.supabase.co/storage/v1/object/public/TV%20Series/Onegai%20Aipri/Backdrop/Onegai%20Aipri%20-%20Backdrop.png',
+    year: 2026,
+    releaseDate: 'April 5, 2026',
+    rating: '6+',
+    score: 9.4,
+    seasonsCount: 1,
+    genres: ['Anime', 'Magical girl', 'Idol', 'Science fiction'],
+    cast: ['Minori Fujidera (Himari Aozora)', 'Saki Hiratsuka (Mitsuki Hoshikawa)', 'Anna Yuruno', 'Kanna Nakamura'],
+    director: 'Junichi Sato & OLM / Dongwoo A&E',
+    language: 'Japanese',
+    subtitles: ['English'],
+    serverName: 'LuluStream',
+    quality: ['1080p FHD', 'Stereo 2.0'],
+    featured: true,
+    trending: true,
+    isNew: true,
+    isPopular: true,
+    videoUrl: 'https://lulust.com/e/ej6qz8uzyivp',
+    progress: 0,
+    seasons: [
+      {
+        seasonNumber: 1,
+        title: 'Season 1',
+        episodes: [
+          {
+            id: 'onegai-aipri-s1-e1',
+            episodeNumber: 1,
+            seasonNumber: 1,
+            title: 'Please! Become an AiPri!',
+            duration: '24:20',
+            description:
+              'Himari enters Private Paradime Academy and dreams of making thousands of friends. An unexpected encounter leads her to the secret virtual world of AiPri Verse, where her idol journey begins!',
+            thumbnailUrl:
+              'https://migabviadyfvzqgjtfom.supabase.co/storage/v1/object/public/TV%20Series/Onegai%20Aipri/Episodes%20Thumbnail/ej6qz8uzyivp.jpg',
+            videoUrl: 'https://lulust.com/e/ej6qz8uzyivp',
+            progress: 0
+          }
+        ]
+      }
+    ]
+  },
+  {
     id: 'cyber-odyssey',
     title: 'Cyber Odyssey: 2189',
     type: 'movie',
@@ -525,6 +576,10 @@ export const MOCK_CHANNELS: LiveChannel[] = [
 
 export const GENRES = [
   'All Genres',
+  'Anime',
+  'Magical girl',
+  'Idol',
+  'Science fiction',
   'Action',
   'Sci-Fi',
   'Drama',

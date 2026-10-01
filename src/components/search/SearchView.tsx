@@ -16,7 +16,7 @@ export const SearchView: React.FC = () => {
   const [showFilters, setShowFilters] = useState<boolean>(false);
 
   // Quick suggestions
-  const suggestions = ['Sci-Fi', 'Cyberpunk', 'Space Odyssey', 'Noir', 'Action', 'Sports Live'];
+  const suggestions = ['Onegai Aipri', 'Anime', 'Idol', 'Sci-Fi', 'Cyberpunk', 'Space Odyssey', 'Noir', 'Action'];
 
   // Simulate smooth reactive search state
   useEffect(() => {

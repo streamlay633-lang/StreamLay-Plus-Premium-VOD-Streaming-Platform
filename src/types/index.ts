@@ -26,8 +26,10 @@ export interface ContentItem {
   longDescription?: string;
   backdropUrl: string;
   posterUrl: string;
+  logoUrl?: string;
   year: number;
-  rating: string; // e.g. "PG-13", "TV-MA", "R"
+  releaseDate?: string;
+  rating: string; // e.g. "PG-13", "TV-MA", "R", "6+"
   score: number; // e.g. 8.9
   duration?: string; // e.g. "2h 14m" (movies)
   seasonsCount?: number; // e.g. 4 (series)
@@ -35,6 +37,8 @@ export interface ContentItem {
   cast: string[];
   director: string;
   language: string;
+  subtitles?: string[];
+  serverName?: string;
   quality: string[]; // e.g. ["4K UHD", "HDR10+", "Dolby Atmos"]
   featured?: boolean;
   trending?: boolean;
