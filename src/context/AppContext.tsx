@@ -1,6 +1,20 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { ContentItem, LiveChannel, PageView, ToastMessage, UserProfile, Episode } from '../types';
+import { ContentItem, LiveChannel, PageView, ToastMessage, UserProfile, Episode, VideoServer } from '../types';
 import { MOCK_CONTENT, MOCK_CHANNELS } from '../data/mockContent';
+
+export interface ActivePlaybackState {
+  title: string;
+  videoUrl: string;
+  posterUrl: string;
+  contentId?: string;
+  episodeId?: string;
+  isLive?: boolean;
+  subtitle?: string;
+  rating?: string;
+  genres?: string[];
+  currentServer?: string;
+  availableServers?: VideoServer[];
+}
 
 interface AppContextType {
   userName: string;
@@ -11,18 +25,9 @@ interface AppContextType {
   setSelectedContentId: (id: string | null) => void;
   selectedContent: ContentItem | null;
   selectedEpisode: Episode | null;
-  activePlayback: {
-    title: string;
-    videoUrl: string;
-    posterUrl: string;
-    contentId?: string;
-    episodeId?: string;
-    isLive?: boolean;
-    subtitle?: string;
-    rating?: string;
-    genres?: string[];
-  } | null;
-  startPlayback: (item: ContentItem, episode?: Episode) => void;
+  activePlayback: ActivePlaybackState | null;
+  startPlayback: (item: ContentItem, episode?: Episode, server?: VideoServer) => void;
+  switchServer: (server: VideoServer) => void;
   startLivePlayback: (channel: LiveChannel) => void;
   stopPlayback: () => void;
   myList: string[];
@@ -74,17 +79,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [selectedContentId, setSelectedContentId] = useState<string | null>(null);
   const [selectedEpisodeId, setSelectedEpisodeId] = useState<string | null>(null);
 
-  const [activePlayback, setActivePlayback] = useState<{
-    title: string;
-    videoUrl: string;
-    posterUrl: string;
-    contentId?: string;
-    episodeId?: string;
-    isLive?: boolean;
-    subtitle?: string;
-    rating?: string;
-    genres?: string[];
-  } | null>(null);
+  const [activePlayback, setActivePlayback] = useState<ActivePlaybackState | null>(null);
 
   const [myList, setMyList] = useState<string[]>(() => {
     try {
@@ -262,24 +257,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     startPlayback(item, targetEpisode);
   };
 
-  const startPlayback = (item: ContentItem, episode?: Episode) => {
+  const startPlayback = (item: ContentItem, episode?: Episode, server?: VideoServer) => {
     setSelectedContentId(item.id);
     setSelectedEpisodeId(episode ? episode.id : null);
+
+    const availableServers: VideoServer[] = episode?.servers || item.servers || [
+      { id: 'primary', name: item.serverName || 'Primary Server', url: episode ? episode.videoUrl : item.videoUrl, quality: 'Auto' }
+    ];
+    const targetServer = server || availableServers[0];
 
     setActivePlayback({
       title: episode ? `${item.title}: ${episode.title}` : item.title,
       subtitle: episode ? `S${episode.seasonNumber} : E${episode.episodeNumber}` : `${item.year} · ${item.duration || ''}`,
-      videoUrl: episode ? episode.videoUrl : item.videoUrl,
+      videoUrl: targetServer ? targetServer.url : (episode ? episode.videoUrl : item.videoUrl),
       posterUrl: episode ? episode.thumbnailUrl : item.backdropUrl,
       contentId: item.id,
       episodeId: episode?.id,
       isLive: false,
       rating: item.rating,
-      genres: item.genres
+      genres: item.genres,
+      currentServer: targetServer?.name || 'Primary Server',
+      availableServers
     });
 
     setActivePage('player');
     window.scrollTo({ top: 0 });
+  };
+
+  const switchServer = (server: VideoServer) => {
+    setActivePlayback((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        videoUrl: server.url,
+        currentServer: server.name
+      };
+    });
+    addToast(`Switched server to ${server.name}`, 'info');
   };
 
   const startLivePlayback = (channel: LiveChannel) => {
@@ -328,6 +342,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         selectedEpisode,
         activePlayback,
         startPlayback,
+        switchServer,
         startLivePlayback,
         stopPlayback,
         myList,

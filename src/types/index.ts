@@ -1,5 +1,13 @@
 export type ContentType = 'movie' | 'series';
 
+export interface VideoServer {
+  id: string;
+  name: string;
+  url: string;
+  quality?: string;
+  isEmbed?: boolean;
+}
+
 export interface Episode {
   id: string;
   episodeNumber: number;
@@ -10,6 +18,7 @@ export interface Episode {
   thumbnailUrl: string;
   progress?: number;
   videoUrl: string;
+  servers?: VideoServer[];
 }
 
 export interface Season {
@@ -39,6 +48,7 @@ export interface ContentItem {
   language: string;
   subtitles?: string[];
   serverName?: string;
+  servers?: VideoServer[];
   quality: string[]; // e.g. ["4K UHD", "HDR10+", "Dolby Atmos"]
   featured?: boolean;
   trending?: boolean;

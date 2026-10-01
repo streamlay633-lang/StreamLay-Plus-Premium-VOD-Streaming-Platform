@@ -22,7 +22,8 @@ import {
   Keyboard,
   AlertCircle,
   RefreshCw,
-  Sliders
+  Sliders,
+  Server
 } from 'lucide-react';
 
 export const VideoPlayerView: React.FC = () => {
@@ -34,7 +35,8 @@ export const VideoPlayerView: React.FC = () => {
     openPlayer,
     updateProgress,
     setActivePage,
-    addToast
+    addToast,
+    switchServer
   } = useApp();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -56,6 +58,7 @@ export const VideoPlayerView: React.FC = () => {
   const [hasError, setHasError] = useState<boolean>(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState<boolean>(false);
   const [showSubtitlesMenu, setShowSubtitlesMenu] = useState<boolean>(false);
+  const [showServerMenu, setShowServerMenu] = useState<boolean>(false);
   const [showShortcutsModal, setShowShortcutsModal] = useState<boolean>(false);
   const [showInfoOverlay, setShowInfoOverlay] = useState<boolean>(false);
 
@@ -293,6 +296,8 @@ export const VideoPlayerView: React.FC = () => {
 
   const isEmbed = Boolean(
     videoSource.includes('lulust.com') ||
+    videoSource.includes('playmogo.com') ||
+    videoSource.includes('dood') ||
     videoSource.includes('<iframe') ||
     videoSource.includes('/e/') ||
     videoSource.includes('embed')
@@ -305,6 +310,27 @@ export const VideoPlayerView: React.FC = () => {
     }
     return src;
   };
+
+  const availableServers = activePlayback?.availableServers && activePlayback.availableServers.length > 0
+    ? activePlayback.availableServers
+    : [
+        {
+          id: 'lulustream',
+          name: 'LuluStream',
+          url: 'https://lulust.com/e/ej6qz8uzyivp',
+          quality: '1080p FHD'
+        },
+        {
+          id: 'doodstream',
+          name: 'DoodStream',
+          url: 'https://playmogo.com/e/jlarlo506i3k',
+          quality: 'Fast Stream'
+        }
+      ];
+
+  const currentServerName =
+    activePlayback?.currentServer ||
+    (videoSource.includes('playmogo') || videoSource.includes('dood') ? 'DoodStream' : 'LuluStream');
 
   useEffect(() => {
     if (isEmbed) {
@@ -321,6 +347,7 @@ export const VideoPlayerView: React.FC = () => {
       onClick={() => {
         setShowSettingsMenu(false);
         setShowSubtitlesMenu(false);
+        setShowServerMenu(false);
       }}
     >
       {/* Video Element or Embed Stream */}
@@ -430,9 +457,67 @@ export const VideoPlayerView: React.FC = () => {
                 </span>
               )}
               {isEmbed && (
-                <span className="px-2 py-0.5 rounded bg-purple-600/70 text-purple-200 border border-purple-400/30 font-semibold text-[10px] tracking-wider">
-                  LuluStream Server
-                </span>
+                <div className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowServerMenu(!showServerMenu);
+                      setShowSettingsMenu(false);
+                      setShowSubtitlesMenu(false);
+                    }}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-600/80 hover:bg-purple-600 text-white font-semibold text-[11px] tracking-wider border border-purple-400/40 shadow-lg shadow-purple-600/30 transition-all hover:scale-105 active:scale-95"
+                    title="Switch streaming server (LuluStream / DoodStream)"
+                  >
+                    <Server className="w-3.5 h-3.5 text-purple-200" />
+                    <span>Server: {currentServerName}</span>
+                  </button>
+
+                  {showServerMenu && (
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute top-full left-0 mt-2 w-60 p-2.5 rounded-2xl bg-slate-950/95 border border-white/20 backdrop-blur-xl shadow-2xl text-xs z-50 animate-fade-in"
+                    >
+                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-1 flex items-center justify-between">
+                        <span>Select Video Server</span>
+                        <span className="text-purple-400">Multi-Source</span>
+                      </div>
+                      <div className="space-y-1">
+                        {availableServers.map((srv) => {
+                          const isCurrent =
+                            activePlayback?.currentServer === srv.name ||
+                            (!activePlayback?.currentServer && videoSource === srv.url) ||
+                            (srv.id === 'doodstream' && (videoSource.includes('playmogo') || videoSource.includes('dood'))) ||
+                            (srv.id === 'lulustream' && videoSource.includes('lulust'));
+                          return (
+                            <button
+                              key={srv.id}
+                              onClick={() => {
+                                switchServer(srv);
+                                setShowServerMenu(false);
+                              }}
+                              className={`w-full text-left px-3 py-2 rounded-xl flex items-center justify-between transition-all ${
+                                isCurrent
+                                  ? 'bg-purple-600 text-white font-bold shadow-md shadow-purple-600/40'
+                                  : 'text-slate-300 hover:bg-white/10 hover:text-white'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <span className={`w-2 h-2 rounded-full ${isCurrent ? 'bg-emerald-300 animate-pulse' : 'bg-slate-500'}`} />
+                                <div>
+                                  <div className="font-semibold text-xs">{srv.name}</div>
+                                  <div className="text-[10px] text-slate-300/80">
+                                    {srv.id === 'doodstream' ? 'DoodStream (Playmogo Server)' : srv.quality || 'Fast HD Stream'}
+                                  </div>
+                                </div>
+                              </div>
+                              {isCurrent && <Check className="w-3.5 h-3.5 text-white" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
             {activePlayback?.subtitle && (
@@ -783,10 +868,38 @@ export const VideoPlayerView: React.FC = () => {
 
       {/* Embedded Stream Bottom Bar */}
       {isEmbed && (
-        <div className="absolute bottom-4 left-4 right-4 z-30 pointer-events-none flex items-center justify-between">
-          <div className="pointer-events-auto px-3.5 py-1.5 rounded-xl bg-black/80 backdrop-blur-md border border-white/10 text-xs text-slate-300 flex items-center gap-2 shadow-xl">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Server: <strong className="text-white font-semibold">LuluStream</strong> (External Embed)</span>
+        <div className="absolute bottom-4 left-4 right-4 z-30 pointer-events-none flex flex-wrap items-center justify-between gap-3">
+          <div className="pointer-events-auto flex items-center gap-2 flex-wrap">
+            <div className="px-3 py-1.5 rounded-xl bg-black/85 backdrop-blur-md border border-white/10 text-xs text-slate-300 flex items-center gap-2 shadow-xl">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Active: <strong className="text-white font-semibold">{currentServerName}</strong></span>
+            </div>
+
+            {/* Quick Switch Server Buttons */}
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-black/85 backdrop-blur-md border border-white/15 shadow-xl">
+              <span className="text-[10px] text-slate-400 font-bold uppercase px-2 hidden sm:inline">Servers:</span>
+              {availableServers.map((srv) => {
+                const isActive =
+                  activePlayback?.currentServer === srv.name ||
+                  (!activePlayback?.currentServer && videoSource === srv.url) ||
+                  (srv.id === 'doodstream' && (videoSource.includes('playmogo') || videoSource.includes('dood'))) ||
+                  (srv.id === 'lulustream' && videoSource.includes('lulust'));
+                return (
+                  <button
+                    key={srv.id}
+                    onClick={() => switchServer(srv)}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 ${
+                      isActive
+                        ? 'bg-purple-600 text-white shadow-md shadow-purple-600/40 font-bold scale-105'
+                        : 'text-slate-300 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-300' : 'bg-slate-500'}`} />
+                    <span>{srv.name}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {nextEpisode && (

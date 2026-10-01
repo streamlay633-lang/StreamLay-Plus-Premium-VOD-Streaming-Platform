@@ -23,6 +23,7 @@ export const ContentDetailsView: React.FC = () => {
   const {
     selectedContent,
     openPlayer,
+    startPlayback,
     toggleMyList,
     isInMyList,
     setActivePage,
@@ -156,6 +157,24 @@ export const ContentDetailsView: React.FC = () => {
                 <span>Play Now</span>
               </button>
 
+              {/* Direct Server Selector */}
+              {selectedContent.servers && selectedContent.servers.length > 1 && (
+                <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/60 border border-white/15 backdrop-blur-md">
+                  <span className="text-[11px] text-slate-400 font-semibold px-2 hidden sm:inline">Server:</span>
+                  {selectedContent.servers.map((srv) => (
+                    <button
+                      key={srv.id}
+                      onClick={() => startPlayback(selectedContent, undefined, srv)}
+                      className="px-3 py-2 rounded-lg text-xs font-semibold bg-white/10 hover:bg-purple-600 hover:text-white text-slate-200 transition-all active:scale-95 flex items-center gap-1.5"
+                      title={`Play on ${srv.name}`}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      <span>{srv.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <button
                 onClick={() => toggleMyList(selectedContent.id)}
                 className={`inline-flex items-center gap-2 px-4 py-3 rounded-xl border backdrop-blur-md text-sm font-semibold transition-all hover:scale-105 active:scale-95 ${
@@ -227,7 +246,22 @@ export const ContentDetailsView: React.FC = () => {
                     : ' · Dolby Atmos 5.1'}
                 </span>
               </div>
-              {selectedContent.serverName && (
+              {selectedContent.servers && selectedContent.servers.length > 0 ? (
+                <div className="border-t border-white/5 pt-2.5">
+                  <span className="text-slate-400 block mb-1">Streaming Servers</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {selectedContent.servers.map((srv) => (
+                      <span
+                        key={srv.id}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-950/60 text-purple-300 font-semibold text-xs border border-purple-500/30"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span>{srv.name}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : selectedContent.serverName ? (
                 <div className="border-t border-white/5 pt-2.5">
                   <span className="text-slate-400 block mb-0.5">Streaming Server</span>
                   <span className="inline-flex items-center gap-1.5 font-semibold text-purple-300">
@@ -235,7 +269,7 @@ export const ContentDetailsView: React.FC = () => {
                     {selectedContent.serverName}
                   </span>
                 </div>
-              )}
+              ) : null}
               <div className="border-t border-white/5 pt-2.5 flex items-center justify-between">
                 <span className="text-slate-400">Stream Quality</span>
                 <div className="flex gap-1">
@@ -326,9 +360,27 @@ export const ContentDetailsView: React.FC = () => {
                               {ep.duration}
                             </span>
                           </div>
-                          <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                          <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-2">
                             {ep.description}
                           </p>
+
+                          {/* Quick Server Switchers for Episode */}
+                          {ep.servers && ep.servers.length > 0 && (
+                            <div className="flex items-center gap-1.5 flex-wrap pt-1" onClick={(e) => e.stopPropagation()}>
+                              <span className="text-[10px] text-slate-500 font-semibold uppercase">Play on:</span>
+                              {ep.servers.map((srv) => (
+                                <button
+                                  key={srv.id}
+                                  onClick={() => startPlayback(selectedContent, ep, srv)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-purple-600 text-slate-300 hover:text-white text-[11px] font-semibold border border-white/10 hover:border-purple-500 transition-all active:scale-95 shadow-sm"
+                                  title={`Play Episode on ${srv.name}`}
+                                >
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                                  <span>{srv.name}</span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}

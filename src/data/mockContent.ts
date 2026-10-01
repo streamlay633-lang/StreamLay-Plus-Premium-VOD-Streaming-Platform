@@ -23,6 +23,20 @@ export const MOCK_CONTENT: ContentItem[] = [
     language: 'Japanese',
     subtitles: ['English'],
     serverName: 'LuluStream',
+    servers: [
+      {
+        id: 'lulustream',
+        name: 'LuluStream',
+        url: 'https://lulust.com/e/ej6qz8uzyivp',
+        quality: '1080p FHD'
+      },
+      {
+        id: 'doodstream',
+        name: 'DoodStream',
+        url: 'https://playmogo.com/e/jlarlo506i3k',
+        quality: 'Fast Stream'
+      }
+    ],
     quality: ['1080p FHD', 'Stereo 2.0'],
     featured: true,
     trending: true,
@@ -46,6 +60,20 @@ export const MOCK_CONTENT: ContentItem[] = [
             thumbnailUrl:
               'https://migabviadyfvzqgjtfom.supabase.co/storage/v1/object/public/TV%20Series/Onegai%20Aipri/Episodes%20Thumbnail/ej6qz8uzyivp.jpg',
             videoUrl: 'https://lulust.com/e/ej6qz8uzyivp',
+            servers: [
+              {
+                id: 'lulustream',
+                name: 'LuluStream',
+                url: 'https://lulust.com/e/ej6qz8uzyivp',
+                quality: '1080p FHD'
+              },
+              {
+                id: 'doodstream',
+                name: 'DoodStream',
+                url: 'https://playmogo.com/e/jlarlo506i3k',
+                quality: 'Fast Stream'
+              }
+            ],
             progress: 0
           }
         ]
