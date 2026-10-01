@@ -9,8 +9,8 @@ export const MOCK_CONTENT: ContentItem[] = [
       'In a neon-drenched metropolis divided by neural networks, a renegade data courier unearths an ancient transmission that threatens the world’s sovereign artificial intelligences.',
     longDescription:
       'Set against the sprawling, multi-tiered megacity of Neo-Kyoto in the year 2189, Cyber Odyssey chronicles the high-stakes journey of Kaelen Vex, an elite neural courier whose consciousness harbors the final biometric key to the Citadel mainframe. Hunted by syndicate synthetics and military enforcers, Kaelen must cross the subterranean cyber-slums to deliver the broadcast before the global lockdown takes effect.',
-    backdropUrl: '/src/assets/images/hero_cyber_odyssey_1790849659064.jpg',
-    posterUrl: '/src/assets/images/poster_crimson_veil_1790849683496.jpg',
+    backdropUrl: '/assets/images/hero_cyber_odyssey_1790849659064.jpg',
+    posterUrl: '/assets/images/poster_crimson_veil_1790849683496.jpg',
     year: 2026,
     rating: 'PG-13',
     score: 9.1,
@@ -34,8 +34,8 @@ export const MOCK_CONTENT: ContentItem[] = [
       'A psychological neo-noir thriller about a weary detective untangling an enigmatic syndicate hiding in plain sight within the rainy alleyways of Manhattan.',
     longDescription:
       'Detective Julian Croft thought he had seen everything until an impossible robbery in an encrypted vault leaves only a crimson silk cipher. As detectives and corrupt officials clash in midnight precinct rooms, Julian enters an underground web where every ally might be a handler.',
-    backdropUrl: '/src/assets/images/poster_crimson_veil_1790849683496.jpg',
-    posterUrl: '/src/assets/images/poster_crimson_veil_1790849683496.jpg',
+    backdropUrl: '/assets/images/poster_crimson_veil_1790849683496.jpg',
+    posterUrl: '/assets/images/poster_crimson_veil_1790849683496.jpg',
     year: 2025,
     rating: 'R',
     score: 8.8,
@@ -58,8 +58,8 @@ export const MOCK_CONTENT: ContentItem[] = [
       'When deep-space colony vessel Astraea loses orbital gravity near a dying magnetar, the surviving crew must navigate uncharted spatial rifts and alien anomalies.',
     longDescription:
       'Decades from Earth, the exploration cruiser Astraea faces a spatial collapse near an uncharted cosmic anomaly. Captain Teresa Ward must unite a fractured team of astrophysicists and colonial pioneers as temporal distortions begin rewriting their memories.',
-    backdropUrl: '/src/assets/images/poster_stellar_drift_1790849695532.jpg',
-    posterUrl: '/src/assets/images/poster_stellar_drift_1790849695532.jpg',
+    backdropUrl: '/assets/images/poster_stellar_drift_1790849695532.jpg',
+    posterUrl: '/assets/images/poster_stellar_drift_1790849695532.jpg',
     year: 2026,
     rating: 'TV-MA',
     score: 9.3,
@@ -86,7 +86,7 @@ export const MOCK_CONTENT: ContentItem[] = [
             title: 'Episode 1: The Drift Begins',
             duration: '56m',
             description: 'The Astraea experiences catastrophic engine malfunction during deep hyper-transit.',
-            thumbnailUrl: '/src/assets/images/poster_stellar_drift_1790849695532.jpg',
+            thumbnailUrl: '/assets/images/poster_stellar_drift_1790849695532.jpg',
             progress: 100,
             videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'
           },
@@ -97,7 +97,7 @@ export const MOCK_CONTENT: ContentItem[] = [
             title: 'Episode 2: Echoes in the Void',
             duration: '52m',
             description: 'Sensors detect an unidentified derelict structure radiating quantum signals.',
-            thumbnailUrl: '/src/assets/images/poster_stellar_drift_1790849695532.jpg',
+            thumbnailUrl: '/assets/images/poster_stellar_drift_1790849695532.jpg',
             progress: 45,
             videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4'
           },
@@ -108,7 +108,7 @@ export const MOCK_CONTENT: ContentItem[] = [
             title: 'Episode 3: Chrono Distortion',
             duration: '58m',
             description: 'Temporal ripples cause physical corridors of the ship to fold into past timelines.',
-            thumbnailUrl: '/src/assets/images/poster_stellar_drift_1790849695532.jpg',
+            thumbnailUrl: '/assets/images/poster_stellar_drift_1790849695532.jpg',
             progress: 0,
             videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
           },
@@ -119,7 +119,7 @@ export const MOCK_CONTENT: ContentItem[] = [
             title: 'Episode 4: The Core Protocol',
             duration: '61m',
             description: 'The crew debates an irreversible jump through the singularity threshold.',
-            thumbnailUrl: '/src/assets/images/poster_stellar_drift_1790849695532.jpg',
+            thumbnailUrl: '/assets/images/poster_stellar_drift_1790849695532.jpg',
             progress: 0,
             videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4'
           }
@@ -136,7 +136,7 @@ export const MOCK_CONTENT: ContentItem[] = [
             title: 'Episode 1: Beyond the Perimeter',
             duration: '54m',
             description: 'Arrival on the outer perimeter of a dyson ring system with no planetary bodies.',
-            thumbnailUrl: '/src/assets/images/poster_stellar_drift_1790849695532.jpg',
+            thumbnailUrl: '/assets/images/poster_stellar_drift_1790849695532.jpg',
             progress: 0,
             videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'
           }
@@ -152,8 +152,8 @@ export const MOCK_CONTENT: ContentItem[] = [
       'In high-altitude Nordic research stations, satellite engineers discover an encoded rhythmic pulse within geomagnetic solar storms.',
     longDescription:
       'Dr. Freja Lind and her polar outpost team intercept a structured broadband signal synchronized with extreme polar auroras. As governments initiate global blackout drills, the signal reveals instructions for a machine constructed centuries ago beneath the permafrost.',
-    backdropUrl: '/src/assets/images/hero_cyber_odyssey_1790849659064.jpg',
-    posterUrl: '/src/assets/images/poster_crimson_veil_1790849683496.jpg',
+    backdropUrl: '/assets/images/hero_cyber_odyssey_1790849659064.jpg',
+    posterUrl: '/assets/images/poster_crimson_veil_1790849683496.jpg',
     year: 2026,
     rating: 'TV-14',
     score: 8.9,
@@ -178,7 +178,7 @@ export const MOCK_CONTENT: ContentItem[] = [
             title: 'Signal in the Permafrost',
             duration: '49m',
             description: 'A sudden geomagnetic flare knocks out Scandinavian power grids while triggering seismic pings.',
-            thumbnailUrl: '/src/assets/images/hero_cyber_odyssey_1790849659064.jpg',
+            thumbnailUrl: '/assets/images/hero_cyber_odyssey_1790849659064.jpg',
             videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4'
           },
           {
@@ -188,7 +188,7 @@ export const MOCK_CONTENT: ContentItem[] = [
             title: 'Deep Array Seven',
             duration: '53m',
             description: 'Freja descends into a decommissioned Cold War bunker to activate the quantum receiver.',
-            thumbnailUrl: '/src/assets/images/hero_cyber_odyssey_1790849659064.jpg',
+            thumbnailUrl: '/assets/images/hero_cyber_odyssey_1790849659064.jpg',
             videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4'
           }
         ]
@@ -201,8 +201,8 @@ export const MOCK_CONTENT: ContentItem[] = [
     type: 'movie',
     description:
       'An underground street racing thriller spanning Tokyo, Monaco, and Frankfurt, driven by hybrid hypercars and high-stakes corporate espionage.',
-    backdropUrl: '/src/assets/images/hero_cyber_odyssey_1790849659064.jpg',
-    posterUrl: '/src/assets/images/poster_crimson_veil_1790849683496.jpg',
+    backdropUrl: '/assets/images/hero_cyber_odyssey_1790849659064.jpg',
+    posterUrl: '/assets/images/poster_crimson_veil_1790849683496.jpg',
     year: 2025,
     rating: 'PG-13',
     score: 8.4,
@@ -221,8 +221,8 @@ export const MOCK_CONTENT: ContentItem[] = [
     type: 'series',
     description:
       'A sprawling historical fantasy epic of dynastic succession, iron legions, and mystic mountain orders vying for the Golden Spire.',
-    backdropUrl: '/src/assets/images/onboarding_cinema_bg_1790849672978.jpg',
-    posterUrl: '/src/assets/images/poster_stellar_drift_1790849695532.jpg',
+    backdropUrl: '/assets/images/onboarding_cinema_bg_1790849672978.jpg',
+    posterUrl: '/assets/images/poster_stellar_drift_1790849695532.jpg',
     year: 2024,
     rating: 'TV-MA',
     score: 9.4,
@@ -246,7 +246,7 @@ export const MOCK_CONTENT: ContentItem[] = [
             title: 'The Crown of Embers',
             duration: '64m',
             description: 'The King passes without naming an heir, triggering instant mobilization across five provinces.',
-            thumbnailUrl: '/src/assets/images/onboarding_cinema_bg_1790849672978.jpg',
+            thumbnailUrl: '/assets/images/onboarding_cinema_bg_1790849672978.jpg',
             videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4'
           }
         ]
@@ -259,8 +259,8 @@ export const MOCK_CONTENT: ContentItem[] = [
     type: 'series',
     description:
       'An intense cross-border intelligence drama tracing modern cyber warfare, untraceable crypto pipelines, and private military groups.',
-    backdropUrl: '/src/assets/images/poster_crimson_veil_1790849683496.jpg',
-    posterUrl: '/src/assets/images/poster_crimson_veil_1790849683496.jpg',
+    backdropUrl: '/assets/images/poster_crimson_veil_1790849683496.jpg',
+    posterUrl: '/assets/images/poster_crimson_veil_1790849683496.jpg',
     year: 2025,
     rating: 'TV-MA',
     score: 8.7,
@@ -278,8 +278,8 @@ export const MOCK_CONTENT: ContentItem[] = [
     type: 'movie',
     description:
       'Breathtaking nature documentary exploring the hidden bio-luminescent depths of Mariana Trench to the highest ice peaks of the Himalayas.',
-    backdropUrl: '/src/assets/images/live_broadcast_studio_1790849707271.jpg',
-    posterUrl: '/src/assets/images/poster_stellar_drift_1790849695532.jpg',
+    backdropUrl: '/assets/images/live_broadcast_studio_1790849707271.jpg',
+    posterUrl: '/assets/images/poster_stellar_drift_1790849695532.jpg',
     year: 2026,
     rating: 'G',
     score: 9.6,
@@ -298,8 +298,8 @@ export const MOCK_CONTENT: ContentItem[] = [
     type: 'movie',
     description:
       'A sharp, hilarious behind-the-scenes comedy about the chaotic writers’ room of television’s longest-running satirical sitcom.',
-    backdropUrl: '/src/assets/images/onboarding_cinema_bg_1790849672978.jpg',
-    posterUrl: '/src/assets/images/poster_crimson_veil_1790849683496.jpg',
+    backdropUrl: '/assets/images/onboarding_cinema_bg_1790849672978.jpg',
+    posterUrl: '/assets/images/poster_crimson_veil_1790849683496.jpg',
     year: 2025,
     rating: 'PG-13',
     score: 8.2,
@@ -317,8 +317,8 @@ export const MOCK_CONTENT: ContentItem[] = [
     type: 'movie',
     description:
       'Submarine crew discovers an ancient non-terrestrial bioluminescent ecosystem seven miles below the Pacific seabed.',
-    backdropUrl: '/src/assets/images/hero_cyber_odyssey_1790849659064.jpg',
-    posterUrl: '/src/assets/images/poster_stellar_drift_1790849695532.jpg',
+    backdropUrl: '/assets/images/hero_cyber_odyssey_1790849659064.jpg',
+    posterUrl: '/assets/images/poster_stellar_drift_1790849695532.jpg',
     year: 2026,
     rating: 'PG-13',
     score: 8.6,
@@ -337,8 +337,8 @@ export const MOCK_CONTENT: ContentItem[] = [
     type: 'series',
     description:
       'Inside the thrilling, high-stakes international competitive sports circuit where technological biometric suits enhance human athletic potential.',
-    backdropUrl: '/src/assets/images/live_broadcast_studio_1790849707271.jpg',
-    posterUrl: '/src/assets/images/poster_crimson_veil_1790849683496.jpg',
+    backdropUrl: '/assets/images/live_broadcast_studio_1790849707271.jpg',
+    posterUrl: '/assets/images/poster_crimson_veil_1790849683496.jpg',
     year: 2025,
     rating: 'TV-14',
     score: 8.8,
@@ -356,8 +356,8 @@ export const MOCK_CONTENT: ContentItem[] = [
     type: 'series',
     description:
       'Stylish animated cyberpunk anime series following a group of underground synthetic musicians fighting megacorp surveillance.',
-    backdropUrl: '/src/assets/images/hero_cyber_odyssey_1790849659064.jpg',
-    posterUrl: '/src/assets/images/poster_stellar_drift_1790849695532.jpg',
+    backdropUrl: '/assets/images/hero_cyber_odyssey_1790849659064.jpg',
+    posterUrl: '/assets/images/poster_stellar_drift_1790849695532.jpg',
     year: 2026,
     rating: 'TV-14',
     score: 9.1,
@@ -377,8 +377,8 @@ export const MOCK_CONTENT: ContentItem[] = [
     type: 'movie',
     description:
       'In a secluded gothic manor, an archivist restructures centuries of forbidden manuscripts only to discover the pages rearrange themselves at midnight.',
-    backdropUrl: '/src/assets/images/onboarding_cinema_bg_1790849672978.jpg',
-    posterUrl: '/src/assets/images/poster_crimson_veil_1790849683496.jpg',
+    backdropUrl: '/assets/images/onboarding_cinema_bg_1790849672978.jpg',
+    posterUrl: '/assets/images/poster_crimson_veil_1790849683496.jpg',
     year: 2024,
     rating: 'R',
     score: 8.1,

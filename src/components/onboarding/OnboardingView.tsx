@@ -30,7 +30,7 @@ export const OnboardingView: React.FC = () => {
       {/* Background with blurred cinematic theater artwork and subtle dark overlay */}
       <div className="absolute inset-0 z-0">
         <img
-          src="/src/assets/images/onboarding_cinema_bg_1790849672978.jpg"
+          src="/assets/images/onboarding_cinema_bg_1790849672978.jpg"
           alt="StreamLay Cinema Theater"
           referrerPolicy="no-referrer"
           className="w-full h-full object-cover object-center filter blur-sm scale-105 opacity-40 transition-opacity duration-1000"

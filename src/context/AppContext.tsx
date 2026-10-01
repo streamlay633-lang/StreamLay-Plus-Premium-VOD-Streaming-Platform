@@ -287,7 +287,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       title: channel.name,
       subtitle: `LIVE: ${channel.currentProgram}`,
       videoUrl: channel.streamUrl,
-      posterUrl: '/src/assets/images/live_broadcast_studio_1790849707271.jpg',
+      posterUrl: '/assets/images/live_broadcast_studio_1790849707271.jpg',
       isLive: true,
       rating: 'LIVE',
       genres: [channel.category, channel.resolution]

@@ -13,6 +13,27 @@ export default defineConfig(() => {
     },
     build: {
       chunkSizeWarningLimit: 1500,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (id.includes('react') || id.includes('react-dom')) {
+                return 'vendor';
+              }
+              if (id.includes('motion')) {
+                return 'animations';
+              }
+              if (id.includes('lucide-react')) {
+                return 'icons';
+              }
+            }
+          },
+        },
+      },
+    },
+    preview: {
+      port: 3000,
+      host: '0.0.0.0',
     },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
