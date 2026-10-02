@@ -372,6 +372,11 @@ export const ContentDetailsView: React.FC = () => {
                             src={ep.thumbnailUrl}
                             alt={ep.title}
                             referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              if (selectedContent?.backdropUrl) {
+                                e.currentTarget.src = selectedContent.backdropUrl;
+                              }
+                            }}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                           />
                           <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 flex items-center justify-center transition-all">

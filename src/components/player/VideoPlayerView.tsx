@@ -16,6 +16,8 @@ import {
   Subtitles,
   Settings,
   SkipForward,
+  SkipBack,
+  Layers,
   ArrowLeft,
   Info,
   Check,
@@ -64,6 +66,7 @@ export const VideoPlayerView: React.FC = () => {
   const [showSettingsMenu, setShowSettingsMenu] = useState<boolean>(false);
   const [showSubtitlesMenu, setShowSubtitlesMenu] = useState<boolean>(false);
   const [showServerMenu, setShowServerMenu] = useState<boolean>(false);
+  const [showEpisodesMenu, setShowEpisodesMenu] = useState<boolean>(false);
   const [showShortcutsModal, setShowShortcutsModal] = useState<boolean>(false);
   const [showInfoOverlay, setShowInfoOverlay] = useState<boolean>(false);
 
@@ -75,12 +78,12 @@ export const VideoPlayerView: React.FC = () => {
     }
     if (isPlaying) {
       hideControlsTimeout.current = setTimeout(() => {
-        if (!showSettingsMenu && !showSubtitlesMenu && !showShortcutsModal) {
+        if (!showSettingsMenu && !showSubtitlesMenu && !showShortcutsModal && !showServerMenu && !showEpisodesMenu) {
           setShowControls(false);
         }
       }, 3500);
     }
-  }, [isPlaying, showSettingsMenu, showSubtitlesMenu, showShortcutsModal]);
+  }, [isPlaying, showSettingsMenu, showSubtitlesMenu, showShortcutsModal, showServerMenu, showEpisodesMenu]);
 
   useEffect(() => {
     const handleMouseMove = () => resetControlsTimer();
@@ -278,24 +281,35 @@ export const VideoPlayerView: React.FC = () => {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
-  // Next episode logic
-  const getNextEpisode = (): Episode | null => {
-    if (!selectedContent || selectedContent.type !== 'series' || !selectedContent.seasons) return null;
-    const allEpisodes = selectedContent.seasons.flatMap((s) => s.episodes);
-    if (!selectedEpisode) return allEpisodes[1] || null;
-    const currentIndex = allEpisodes.findIndex((e) => e.id === selectedEpisode.id);
-    if (currentIndex !== -1 && currentIndex < allEpisodes.length - 1) {
-      return allEpisodes[currentIndex + 1];
-    }
-    return null;
-  };
+  // Series episode navigation logic
+  const allEpisodes = selectedContent?.seasons?.flatMap((s) => s.episodes) || [];
+  const currentEpisode =
+    selectedEpisode ||
+    allEpisodes.find((e) => e.id === activePlayback?.episodeId) ||
+    allEpisodes[0] ||
+    null;
 
-  const nextEpisode = getNextEpisode();
+  const currentEpIndex = currentEpisode
+    ? allEpisodes.findIndex((e) => e.id === currentEpisode.id)
+    : -1;
+
+  const prevEpisode = currentEpIndex > 0 ? allEpisodes[currentEpIndex - 1] : null;
+  const nextEpisode =
+    currentEpIndex !== -1 && currentEpIndex < allEpisodes.length - 1
+      ? allEpisodes[currentEpIndex + 1]
+      : null;
+
+  const handlePrevEpisode = () => {
+    if (selectedContent && prevEpisode) {
+      openPlayer(selectedContent.id, prevEpisode.id);
+      addToast(`Playing Ep ${prevEpisode.episodeNumber}: ${prevEpisode.title}`, 'info');
+    }
+  };
 
   const handleNextEpisode = () => {
     if (selectedContent && nextEpisode) {
       openPlayer(selectedContent.id, nextEpisode.id);
-      addToast(`Playing Next: ${nextEpisode.title}`, 'info');
+      addToast(`Playing Ep ${nextEpisode.episodeNumber}: ${nextEpisode.title}`, 'info');
     }
   };
 
@@ -430,6 +444,7 @@ export const VideoPlayerView: React.FC = () => {
         setShowSettingsMenu(false);
         setShowSubtitlesMenu(false);
         setShowServerMenu(false);
+        setShowEpisodesMenu(false);
       }}
     >
       {/* Video Element or Embed Stream */}
@@ -438,6 +453,8 @@ export const VideoPlayerView: React.FC = () => {
           <iframe
             src={getEmbedSrc(videoSource)}
             className="w-full h-full border-0"
+            scrolling="no"
+            frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
             allowFullScreen
             title={activePlayback?.title || 'Video Player'}
@@ -535,7 +552,7 @@ export const VideoPlayerView: React.FC = () => {
           </button>
 
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="font-display font-bold text-white text-base sm:text-lg drop-shadow">
                 {activePlayback?.title || 'StreamLay Stream'}
               </h2>
@@ -545,12 +562,101 @@ export const VideoPlayerView: React.FC = () => {
                   LIVE
                 </span>
               )}
+
+              {/* Episodes Selector Menu if series has episodes */}
+              {allEpisodes.length > 1 && (
+                <div className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowEpisodesMenu(!showEpisodesMenu);
+                      setShowServerMenu(false);
+                      setShowSettingsMenu(false);
+                      setShowSubtitlesMenu(false);
+                    }}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-white font-semibold text-[11px] tracking-wider border border-white/20 shadow-lg shadow-purple-600/10 transition-all hover:scale-105 active:scale-95"
+                    title="Select Episode"
+                  >
+                    <Layers className="w-3.5 h-3.5 text-purple-300" />
+                    <span>
+                      {currentEpisode ? `E${currentEpisode.episodeNumber}: ${currentEpisode.duration}` : 'Episodes'}
+                    </span>
+                  </button>
+
+                  {showEpisodesMenu && (
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute top-full left-0 mt-2 w-72 p-2.5 rounded-2xl bg-slate-950/95 border border-white/20 backdrop-blur-xl shadow-2xl text-xs z-50 animate-fade-in"
+                    >
+                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-1 flex items-center justify-between border-b border-white/10 pb-1.5">
+                        <span>Select Episode</span>
+                        <span className="text-purple-400">Season 1</span>
+                      </div>
+                      <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
+                        {allEpisodes.map((ep) => {
+                          const isCurrent = ep.id === currentEpisode?.id;
+                          return (
+                            <button
+                              key={ep.id}
+                              onClick={() => {
+                                if (selectedContent) {
+                                  openPlayer(selectedContent.id, ep.id);
+                                  setShowEpisodesMenu(false);
+                                }
+                              }}
+                              className={`w-full text-left p-2 rounded-xl flex items-center gap-2.5 transition-all ${
+                                isCurrent
+                                  ? 'bg-purple-600 text-white font-bold shadow-md shadow-purple-600/40'
+                                  : 'text-slate-300 hover:bg-white/10 hover:text-white'
+                              }`}
+                            >
+                              <div className="w-14 h-9 rounded-lg overflow-hidden shrink-0 bg-slate-800 border border-white/10 relative">
+                                <img
+                                  src={ep.thumbnailUrl}
+                                  alt={ep.title}
+                                  referrerPolicy="no-referrer"
+                                  onError={(e) => {
+                                    if (selectedContent?.backdropUrl) {
+                                      e.currentTarget.src = selectedContent.backdropUrl;
+                                    }
+                                  }}
+                                  className="w-full h-full object-cover"
+                                />
+                                {isCurrent && (
+                                  <div className="absolute inset-0 bg-purple-900/60 flex items-center justify-center">
+                                    <Play className="w-3.5 h-3.5 fill-white" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center justify-between gap-1">
+                                  <span className="font-semibold text-xs truncate">
+                                    Ep {ep.episodeNumber}: {ep.title}
+                                  </span>
+                                  {isCurrent && <Check className="w-3.5 h-3.5 shrink-0 text-white" />}
+                                </div>
+                                <div className="text-[10px] opacity-80 flex items-center gap-2">
+                                  <span>{ep.duration}</span>
+                                  <span>·</span>
+                                  <span>2 Servers</span>
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {isEmbed && (
                 <div className="relative">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowServerMenu(!showServerMenu);
+                      setShowEpisodesMenu(false);
                       setShowSettingsMenu(false);
                       setShowSubtitlesMenu(false);
                     }}
@@ -616,16 +722,31 @@ export const VideoPlayerView: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          {isEmbed && nextEpisode && (
+          {prevEpisode && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePrevEpisode();
+              }}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-white text-xs font-semibold border border-white/15 shadow-lg transition-all active:scale-95"
+              title={`Prev: Ep ${prevEpisode.episodeNumber} - ${prevEpisode.title}`}
+            >
+              <SkipBack className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Ep {prevEpisode.episodeNumber}</span>
+            </button>
+          )}
+
+          {nextEpisode && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 handleNextEpisode();
               }}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-lg shadow-purple-600/30 transition-all active:scale-95 mr-1"
+              title={`Next: Ep ${nextEpisode.episodeNumber} - ${nextEpisode.title}`}
             >
               <SkipForward className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Next Episode</span>
+              <span className="hidden sm:inline">Ep {nextEpisode.episodeNumber}</span>
             </button>
           )}
 
@@ -1002,7 +1123,7 @@ export const VideoPlayerView: React.FC = () => {
 
             {/* Quick Switch Server Buttons */}
             <div className="flex items-center gap-1 p-1 rounded-xl bg-black/85 backdrop-blur-md border border-white/15 shadow-xl">
-              <span className="text-[10px] text-slate-400 font-bold uppercase px-2 hidden sm:inline">Servers:</span>
+              <span className="text-[10px] text-slate-400 font-bold uppercase px-2 hidden sm:inline">Server:</span>
               {availableServers.map((srv) => {
                 const isActive =
                   activePlayback?.currentServer === srv.name ||
@@ -1025,17 +1146,60 @@ export const VideoPlayerView: React.FC = () => {
                 );
               })}
             </div>
+
+            {/* Quick Episode Switcher in bottom bar if series has episodes */}
+            {allEpisodes.length > 1 && (
+              <div className="flex items-center gap-1 p-1 rounded-xl bg-black/85 backdrop-blur-md border border-white/15 shadow-xl">
+                <span className="text-[10px] text-purple-300 font-bold uppercase px-2 hidden sm:inline">Episodes:</span>
+                {allEpisodes.map((ep) => {
+                  const isEpActive = ep.id === currentEpisode?.id;
+                  return (
+                    <button
+                      key={ep.id}
+                      onClick={() => {
+                        if (selectedContent) {
+                          openPlayer(selectedContent.id, ep.id);
+                        }
+                      }}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 ${
+                        isEpActive
+                          ? 'bg-purple-600 text-white shadow-md shadow-purple-600/40 font-bold'
+                          : 'text-slate-300 hover:text-white hover:bg-white/10'
+                      }`}
+                      title={`Episode ${ep.episodeNumber}: ${ep.title} (${ep.duration})`}
+                    >
+                      <span>E{ep.episodeNumber}</span>
+                      <span className="text-[10px] opacity-75 hidden md:inline">({ep.duration})</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          {nextEpisode && (
-            <button
-              onClick={handleNextEpisode}
-              className="pointer-events-auto flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-xl shadow-purple-600/30 transition-all hover:scale-105 active:scale-95"
-            >
-              <SkipForward className="w-4 h-4" />
-              <span>Next: {nextEpisode.title}</span>
-            </button>
-          )}
+          <div className="pointer-events-auto flex items-center gap-2">
+            {prevEpisode && (
+              <button
+                onClick={handlePrevEpisode}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-white text-xs font-semibold border border-white/15 shadow-xl transition-all hover:scale-105 active:scale-95"
+                title={`Prev: Ep ${prevEpisode.episodeNumber} - ${prevEpisode.title}`}
+              >
+                <SkipBack className="w-3.5 h-3.5" />
+                <span>Ep {prevEpisode.episodeNumber}</span>
+              </button>
+            )}
+
+            {nextEpisode && (
+              <button
+                onClick={handleNextEpisode}
+                className="pointer-events-auto flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-xl shadow-purple-600/30 transition-all hover:scale-105 active:scale-95"
+                title={`Next: Ep ${nextEpisode.episodeNumber} - ${nextEpisode.title}`}
+              >
+                <SkipForward className="w-4 h-4" />
+                <span>Next: Ep {nextEpisode.episodeNumber}</span>
+              </button>
+            )}
+          </div>
         </div>
       )}
 

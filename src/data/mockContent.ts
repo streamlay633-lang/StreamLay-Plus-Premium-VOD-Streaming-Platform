@@ -58,7 +58,7 @@ export const MOCK_CONTENT: ContentItem[] = [
             description:
               'Himari enters Private Paradime Academy and dreams of making thousands of friends. An unexpected encounter leads her to the secret virtual world of AiPri Verse, where her idol journey begins!',
             thumbnailUrl:
-              'https://migabviadyfvzqgjtfom.supabase.co/storage/v1/object/public/TV%20Series/Onegai%20Aipri/Episodes%20Thumbnail/ej6qz8uzyivp.jpg',
+              '/assets/images/onegai_aipri_ep1.jpg',
             videoUrl: 'https://lulust.com/e/ej6qz8uzyivp',
             servers: [
               {
@@ -71,6 +71,33 @@ export const MOCK_CONTENT: ContentItem[] = [
                 id: 'doodstream',
                 name: 'DoodStream',
                 url: 'https://playmogo.com/e/jlarlo506i3k',
+                quality: 'Fast Stream'
+              }
+            ],
+            progress: 0
+          },
+          {
+            id: 'onegai-aipri-s1-e2',
+            episodeNumber: 2,
+            seasonNumber: 1,
+            title: "Let's make that dream come true♪",
+            duration: '24:30',
+            description:
+              "Himari continues her dazzling idol journey in AiPri Verse alongside Mitsuki. Striving together on the radiant stage, they take their next steps to make everyone's sparkling dreams come true♪",
+            thumbnailUrl:
+              '/assets/images/onegai_aipri_ep2.jpg',
+            videoUrl: 'https://lulust.com/e/1enk2xccx5r5',
+            servers: [
+              {
+                id: 'lulustream',
+                name: 'LuluStream',
+                url: 'https://lulust.com/e/1enk2xccx5r5',
+                quality: '1080p FHD'
+              },
+              {
+                id: 'doodstream',
+                name: 'DoodStream',
+                url: 'https://playmogo.com/e/6fj07ncr9pia',
                 quality: 'Fast Stream'
               }
             ],
