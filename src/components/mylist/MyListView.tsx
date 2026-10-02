@@ -6,7 +6,7 @@ import { Bookmark, Film, Tv, Play } from 'lucide-react';
 
 export const MyListView: React.FC = () => {
   const { myList, setActivePage, openPlayer } = useApp();
-  const [filterType, setFilterType] = useState<'all' | 'movie' | 'series'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'series' | 'live'>('all');
 
   const items = MOCK_CONTENT.filter((c) => myList.includes(c.id));
   const filtered = items.filter((c) => {
@@ -35,8 +35,8 @@ export const MyListView: React.FC = () => {
         <div className="flex items-center p-1 bg-slate-900 rounded-xl border border-white/10 self-start sm:self-auto">
           {[
             { id: 'all', label: 'All Titles' },
-            { id: 'movie', label: 'Movies' },
             { id: 'series', label: 'Series' },
+            { id: 'live', label: 'Live TV' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -63,20 +63,20 @@ export const MyListView: React.FC = () => {
             No items in this section
           </h3>
           <p className="text-slate-400 text-sm mb-6">
-            Browse trending movies and popular TV series to add titles to your personal collection.
+            Browse Onegai Aipri and Channel 0225 TV to add titles to your personal collection.
           </p>
           <div className="flex justify-center gap-3">
             <button
-              onClick={() => setActivePage('movies')}
-              className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all"
+              onClick={() => setActivePage('series')}
+              className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow-md shadow-purple-600/30"
             >
-              Explore Movies
+              Explore Onegai Aipri
             </button>
             <button
-              onClick={() => setActivePage('series')}
+              onClick={() => setActivePage('live')}
               className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-white/10 transition-all"
             >
-              Explore Series
+              Channel 0225 TV Live
             </button>
           </div>
         </div>

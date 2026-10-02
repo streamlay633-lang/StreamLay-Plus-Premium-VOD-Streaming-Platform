@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ContentItem } from '../../types';
 import { useApp } from '../../context/AppContext';
-import { Play, Plus, Check, Info, Star, Film, Tv } from 'lucide-react';
+import { Play, Plus, Check, Info, Star, Film, Tv, Radio } from 'lucide-react';
 
 interface ContentCardProps {
   item: ContentItem;
@@ -56,7 +56,9 @@ export const ContentCard: React.FC<ContentCardProps> = ({
             imageLoaded && !imageError ? 'opacity-0' : 'opacity-100'
           }`}
         >
-          {item.type === 'movie' ? (
+          {item.type === 'live' ? (
+            <Radio className="w-8 h-8 text-rose-400 mb-2 animate-pulse" />
+          ) : item.type === 'movie' ? (
             <Film className="w-8 h-8 text-purple-400/60 mb-2" />
           ) : (
             <Tv className="w-8 h-8 text-indigo-400/60 mb-2" />
@@ -83,12 +85,17 @@ export const ContentCard: React.FC<ContentCardProps> = ({
         )}
 
         {/* Top Indicators: subtle unboxed badge */}
-        <div className="absolute top-2 left-2 z-10 pointer-events-none">
-          {item.quality?.[0] && (
+        <div className="absolute top-2 left-2 z-10 pointer-events-none flex items-center gap-1.5">
+          {item.type === 'live' ? (
+            <span className="px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase text-white bg-rose-600/90 backdrop-blur-md rounded border border-rose-500/40 flex items-center gap-1 shadow-md">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              LIVE
+            </span>
+          ) : item.quality?.[0] ? (
             <span className="px-1.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase text-slate-200 bg-black/60 backdrop-blur-md rounded border border-white/10">
               {item.quality[0]}
             </span>
-          )}
+          ) : null}
         </div>
 
         {/* Hover Action Overlay */}
@@ -175,7 +182,13 @@ export const ContentCard: React.FC<ContentCardProps> = ({
         <div className="flex items-center gap-1 text-[11px] text-slate-500 mt-0.5">
           <span>{item.year}</span>
           <span aria-hidden="true">·</span>
-          <span>{item.type === 'movie' ? (item.duration || 'Movie') : `${item.seasonsCount || 1} Seasons`}</span>
+          <span>
+            {item.type === 'live'
+              ? '24/7 Live'
+              : item.type === 'movie'
+              ? item.duration || 'Movie'
+              : `${item.seasonsCount || 1} Season${(item.seasonsCount || 1) > 1 ? 's' : ''}`}
+          </span>
           <span aria-hidden="true">·</span>
           <span className="text-slate-400 flex items-center gap-0.5">
             <Star className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />

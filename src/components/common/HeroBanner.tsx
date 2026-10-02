@@ -70,7 +70,13 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ item, featuredCategory }
               {item.rating}
             </span>
             <span aria-hidden="true" className="text-slate-500">·</span>
-            <span>{item.type === 'movie' ? item.duration : `${item.seasonsCount} Seasons`}</span>
+            <span>
+              {item.type === 'live'
+                ? '24/7 Live'
+                : item.type === 'movie'
+                ? item.duration
+                : `${item.seasonsCount || 1} Season${(item.seasonsCount || 1) > 1 ? 's' : ''}`}
+            </span>
             {item.quality?.[0] && (
               <>
                 <span aria-hidden="true" className="text-slate-500">·</span>

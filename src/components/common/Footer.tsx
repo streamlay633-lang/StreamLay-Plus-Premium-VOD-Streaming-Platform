@@ -28,12 +28,6 @@ export const Footer: React.FC = () => {
             Home
           </button>
           <button
-            onClick={() => setActivePage('movies')}
-            className="hover:text-white transition-colors"
-          >
-            Movies
-          </button>
-          <button
             onClick={() => setActivePage('series')}
             className="hover:text-white transition-colors"
           >

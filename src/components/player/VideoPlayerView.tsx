@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
 import { MOCK_CONTENT } from '../../data/mockContent';
 import { Episode } from '../../types';
+import Hls from 'hls.js';
 import {
   Play,
   Pause,
@@ -23,7 +24,9 @@ import {
   AlertCircle,
   RefreshCw,
   Sliders,
-  Server
+  Server,
+  Radio,
+  Tv
 } from 'lucide-react';
 
 export const VideoPlayerView: React.FC = () => {
@@ -33,6 +36,7 @@ export const VideoPlayerView: React.FC = () => {
     selectedContent,
     selectedEpisode,
     openPlayer,
+    openDetails,
     updateProgress,
     setActivePage,
     addToast,
@@ -41,6 +45,7 @@ export const VideoPlayerView: React.FC = () => {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const hlsRef = useRef<Hls | null>(null);
   const hideControlsTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
@@ -252,7 +257,9 @@ export const VideoPlayerView: React.FC = () => {
       document.exitFullscreen().catch(() => {});
     }
     stopPlayback();
-    if (selectedContent) {
+    if (activePlayback?.isLive) {
+      setActivePage('live');
+    } else if (selectedContent) {
       setActivePage('details');
     } else {
       setActivePage('home');
@@ -339,6 +346,81 @@ export const VideoPlayerView: React.FC = () => {
     }
   }, [isEmbed, videoSource]);
 
+  // HLS stream lifecycle (.m3u8) & native video handler
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || isEmbed) return;
+
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+      hlsRef.current = null;
+    }
+
+    if (videoSource.includes('.m3u8')) {
+      setIsLoading(true);
+      setHasError(false);
+
+      if (Hls.isSupported()) {
+        const hls = new Hls({
+          enableWorker: true,
+          lowLatencyMode: true,
+          backBufferLength: 60,
+          maxBufferLength: 30,
+        });
+
+        hlsRef.current = hls;
+        hls.loadSource(videoSource);
+        hls.attachMedia(video);
+
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          setIsLoading(false);
+          video.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+        });
+
+        hls.on(Hls.Events.ERROR, (_event, data) => {
+          if (data.fatal) {
+            switch (data.type) {
+              case Hls.ErrorTypes.NETWORK_ERROR:
+                hls.startLoad();
+                break;
+              case Hls.ErrorTypes.MEDIA_ERROR:
+                hls.recoverMediaError();
+                break;
+              default:
+                hls.destroy();
+                setIsLoading(false);
+                setHasError(true);
+                break;
+            }
+          }
+        });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = videoSource;
+        video.addEventListener('loadedmetadata', () => {
+          setIsLoading(false);
+          video.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+        });
+        video.addEventListener('error', () => {
+          setIsLoading(false);
+          setHasError(true);
+        });
+      } else {
+        setIsLoading(false);
+        setHasError(true);
+      }
+    } else {
+      video.src = videoSource;
+      video.load();
+    }
+
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
+  }, [videoSource, isEmbed]);
+
   return (
     <div
       ref={containerRef}
@@ -365,8 +447,9 @@ export const VideoPlayerView: React.FC = () => {
       ) : (
         <video
           ref={videoRef}
-          src={videoSource}
+          src={videoSource.includes('.m3u8') ? undefined : videoSource}
           playsInline
+          poster={activePlayback?.posterUrl}
           className="w-full h-full object-contain cursor-pointer"
           onClick={togglePlay}
           onTimeUpdate={handleTimeUpdate}
@@ -374,8 +457,10 @@ export const VideoPlayerView: React.FC = () => {
           onWaiting={() => setIsLoading(true)}
           onPlaying={() => setIsLoading(false)}
           onError={() => {
-            setIsLoading(false);
-            setHasError(true);
+            if (!videoSource.includes('.m3u8')) {
+              setIsLoading(false);
+              setHasError(true);
+            }
           }}
         />
       )}
@@ -400,7 +485,10 @@ export const VideoPlayerView: React.FC = () => {
             onClick={() => {
               setHasError(false);
               setIsLoading(true);
-              if (videoRef.current) {
+              if (videoSource.includes('.m3u8') && hlsRef.current) {
+                hlsRef.current.loadSource(videoSource);
+                if (videoRef.current) hlsRef.current.attachMedia(videoRef.current);
+              } else if (videoRef.current) {
                 videoRef.current.load();
                 videoRef.current.play().catch(() => {});
               }
@@ -452,7 +540,8 @@ export const VideoPlayerView: React.FC = () => {
                 {activePlayback?.title || 'StreamLay Stream'}
               </h2>
               {activePlayback?.isLive && (
-                <span className="px-2 py-0.5 rounded bg-rose-600 text-white font-bold text-[10px] tracking-wider animate-pulse">
+                <span className="px-2 py-0.5 rounded bg-rose-600 text-white font-bold text-[10px] tracking-wider animate-pulse flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
                   LIVE
                 </span>
               )}
@@ -537,6 +626,42 @@ export const VideoPlayerView: React.FC = () => {
             >
               <SkipForward className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Next Episode</span>
+            </button>
+          )}
+
+          {activePlayback?.isLive && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (document.fullscreenElement) {
+                  document.exitFullscreen().catch(() => {});
+                }
+                stopPlayback();
+                setActivePage('live');
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600/80 hover:bg-purple-600 text-white text-xs font-semibold backdrop-blur-md border border-purple-400/30 transition-all active:scale-95 shadow-md shadow-purple-600/20"
+              title="Open Live TV Guide"
+            >
+              <Tv className="w-3.5 h-3.5 text-white" />
+              <span className="hidden sm:inline">Live TV Guide</span>
+            </button>
+          )}
+
+          {activePlayback?.contentId && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (document.fullscreenElement) {
+                  document.exitFullscreen().catch(() => {});
+                }
+                stopPlayback();
+                openDetails(activePlayback.contentId!);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold backdrop-blur-md border border-white/15 transition-all active:scale-95"
+              title="View Title Details"
+            >
+              <Info className="w-3.5 h-3.5 text-purple-300" />
+              <span className="hidden sm:inline">Details</span>
             </button>
           )}
 

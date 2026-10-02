@@ -18,7 +18,6 @@ export const Navbar: React.FC = () => {
 
   const navItems: { label: string; page: PageView }[] = [
     { label: 'Home', page: 'home' },
-    { label: 'Movies', page: 'movies' },
     { label: 'Series', page: 'series' },
     { label: 'Live TV', page: 'live' },
     { label: 'My List', page: 'mylist' },

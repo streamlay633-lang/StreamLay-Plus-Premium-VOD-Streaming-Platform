@@ -4,6 +4,7 @@ import { Navbar } from './components/common/Navbar';
 import { MobileNav } from './components/common/MobileNav';
 import { Footer } from './components/common/Footer';
 import { ToastContainer } from './components/common/ToastContainer';
+import { CustomCursor } from './components/common/CustomCursor';
 import { OnboardingView } from './components/onboarding/OnboardingView';
 import { HomeView } from './components/home/HomeView';
 import { MoviesView } from './components/movies/MoviesView';
@@ -22,6 +23,7 @@ const MainAppContent: React.FC = () => {
   if (activePage === 'onboarding') {
     return (
       <main className="min-h-screen bg-[#07090e]">
+        <CustomCursor />
         <OnboardingView />
         <ToastContainer />
       </main>
@@ -32,6 +34,7 @@ const MainAppContent: React.FC = () => {
   if (activePage === 'player') {
     return (
       <main className="fixed inset-0 bg-black z-50">
+        <CustomCursor />
         <VideoPlayerView />
         <ToastContainer />
       </main>
@@ -40,6 +43,9 @@ const MainAppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#07090e] text-slate-100 relative">
+      {/* Interactive Web Cursor Pointer */}
+      <CustomCursor />
+
       {/* Sticky Top Navbar */}
       <Navbar />
 

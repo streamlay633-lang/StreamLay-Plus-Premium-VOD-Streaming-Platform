@@ -50,7 +50,7 @@ export const ProfileView: React.FC = () => {
     }
   }
 
-  const favoriteMovies = myListItems.filter((c) => c.type === 'movie');
+  const favoriteLive = myListItems.filter((c) => c.type === 'live');
   const favoriteSeries = myListItems.filter((c) => c.type === 'series');
 
   const handleSaveName = () => {
@@ -222,7 +222,7 @@ export const ProfileView: React.FC = () => {
                   {myListItems.length} Titles Saved
                 </h3>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  {favoriteMovies.length} Feature Films · {favoriteSeries.length} Television Series
+                  {favoriteSeries.length} Television Series · {favoriteLive.length} Live Channels
                 </p>
               </div>
               <div className="pt-3 border-t border-white/5">
@@ -315,7 +315,7 @@ export const ProfileView: React.FC = () => {
               My Watchlist ({myListItems.length})
             </h2>
             <div className="text-xs text-slate-400">
-              {favoriteMovies.length} Movies · {favoriteSeries.length} Series
+              {favoriteSeries.length} Series · {favoriteLive.length} Live Channels
             </div>
           </div>
 
@@ -324,7 +324,7 @@ export const ProfileView: React.FC = () => {
               <Bookmark className="w-12 h-12 text-slate-600 mx-auto mb-3" />
               <h3 className="font-display text-lg font-bold text-white mb-1">Your list is empty</h3>
               <p className="text-xs text-slate-400 mb-4">
-                Explore movies and series, and click the "+" button to save titles for later.
+                Explore Onegai Aipri and Channel 0225 TV, and click the "+" button to save titles for later.
               </p>
             </div>
           ) : (

@@ -16,7 +16,7 @@ export const SearchView: React.FC = () => {
   const [showFilters, setShowFilters] = useState<boolean>(false);
 
   // Quick suggestions
-  const suggestions = ['Onegai Aipri', 'Anime', 'Idol', 'Sci-Fi', 'Cyberpunk', 'Space Odyssey', 'Noir', 'Action'];
+  const suggestions = ['Onegai Aipri', 'Channel 0225 TV', 'Anime', 'Idol', 'Live TV', 'Entertainment'];
 
   // Simulate smooth reactive search state
   useEffect(() => {
@@ -150,7 +150,6 @@ export const SearchView: React.FC = () => {
           {(
             [
               { id: 'all', label: 'All Results' },
-              { id: 'movie', label: 'Movies' },
               { id: 'series', label: 'Series' },
               { id: 'live', label: 'Live TV' },
             ] as const
@@ -296,7 +295,7 @@ export const SearchView: React.FC = () => {
             We couldn't find matches for "{searchQuery}". Try checking for typos or searching for another genre or director.
           </p>
           <div className="flex flex-wrap justify-center gap-2">
-            {['Cyber Odyssey', 'Action', 'Crime', 'Sci-Fi'].map((term) => (
+            {['Onegai Aipri', 'Channel 0225 TV', 'Anime', 'Live TV'].map((term) => (
               <button
                 key={term}
                 onClick={() => setSearchQuery(term)}
@@ -351,13 +350,13 @@ export const SearchView: React.FC = () => {
             </div>
           )}
 
-          {/* Movies & Series Grid */}
+          {/* Series Grid */}
           {activeTab !== 'live' && filteredItems.length > 0 && (
             <div>
               {activeTab === 'all' && filteredChannels.length > 0 && (
                 <h2 className="font-display text-lg font-bold text-white mb-4 flex items-center gap-2">
                   <Film className="w-4 h-4 text-indigo-400" />
-                  Movies & Series ({filteredItems.length})
+                  Series ({filteredItems.length})
                 </h2>
               )}
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-5">

@@ -1,4 +1,4 @@
-export type ContentType = 'movie' | 'series';
+export type ContentType = 'movie' | 'series' | 'live';
 
 export interface VideoServer {
   id: string;
@@ -72,6 +72,10 @@ export interface LiveChannel {
   category: 'News' | 'Sports' | 'Cinema' | 'Entertainment' | 'Documentary' | 'Music';
   number: number;
   logo: string;
+  posterUrl?: string;
+  backdropUrl?: string;
+  logoUrl?: string;
+  description?: string;
   streamUrl: string;
   currentProgram: string;
   currentProgramDesc: string;

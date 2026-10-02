@@ -14,7 +14,7 @@ export const SeriesView: React.FC = () => {
     return MOCK_CONTENT.filter((c) => c.type === 'series');
   }, []);
 
-  const featuredSeries = allSeries[0] || MOCK_CONTENT[2];
+  const featuredSeries = allSeries[0];
 
   const filteredSeries = useMemo(() => {
     let list = [...allSeries];
@@ -30,26 +30,20 @@ export const SeriesView: React.FC = () => {
   }, [allSeries, activeGenre, sortBy]);
 
   const trendingSeries = allSeries.filter((s) => s.trending);
-  const popularSeries = allSeries.filter((s) => s.isPopular || s.score >= 8.8);
-  const newSeries = allSeries.filter((s) => s.isNew || s.year === 2026);
-
-  // Genre slices
-  const sciFiSeries = allSeries.filter((s) => s.genres.includes('Sci-Fi'));
-  const dramaSeries = allSeries.filter((s) => s.genres.includes('Drama'));
-  const actionSeries = allSeries.filter((s) => s.genres.includes('Action'));
-  const crimeSeries = allSeries.filter((s) => s.genres.includes('Crime'));
-  const animeSeries = allSeries.filter((s) => s.genres.includes('Anime') || s.genres.includes('Animation') || s.genres.includes('Magical girl') || s.genres.includes('Idol'));
+  const animeSeries = allSeries.filter((s) => s.genres.includes('Anime') || s.genres.includes('Idol') || s.genres.includes('Magical girl'));
 
   return (
     <div className="pb-28 pt-0">
       {/* Featured Series Hero */}
-      <HeroBanner item={featuredSeries} featuredCategory="StreamLay Original Series" />
+      {featuredSeries && (
+        <HeroBanner item={featuredSeries} featuredCategory="StreamLay Featured Series" />
+      )}
 
       {/* Filter and View Mode Switcher */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 sm:-mt-10 relative z-30 mb-8">
         <div className="p-4 rounded-2xl bg-slate-900/90 backdrop-blur-xl border border-white/10 shadow-2xl flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-            {['All Genres', 'Anime', 'Magical girl', 'Idol', 'Sci-Fi', 'Drama', 'Action', 'Crime', 'Animation', 'Mystery'].map((g) => (
+            {['All Genres', 'Anime', 'Magical girl', 'Idol', 'Science fiction'].map((g) => (
               <button
                 key={g}
                 onClick={() => {
@@ -125,16 +119,12 @@ export const SeriesView: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          <ContentCarousel title="Trending Series" subtitle="Most watched episodes this week" items={trendingSeries} />
-          {animeSeries.length > 0 && (
-            <ContentCarousel title="Anime & Animation" subtitle="Magical girl idols, epic adventures & fantasy" items={animeSeries} />
+          {trendingSeries.length > 0 && (
+            <ContentCarousel title="Trending Series" subtitle="Most watched episodes this week" items={trendingSeries} />
           )}
-          <ContentCarousel title="Popular Series" subtitle="Long-running critical sensations" items={popularSeries} />
-          <ContentCarousel title="New Series & Premieres" subtitle="Newly released seasons" items={newSeries} />
-          <ContentCarousel title="Sci-Fi & Cosmic Sagas" items={sciFiSeries} />
-          <ContentCarousel title="Intense Dramas" items={dramaSeries} />
-          <ContentCarousel title="Adrenaline & Action" items={actionSeries} />
-          <ContentCarousel title="Underworld & Crime" items={crimeSeries} />
+          {animeSeries.length > 0 && (
+            <ContentCarousel title="Anime & Magical Idol Series" subtitle="Magical girl idols, sparkling songs and virtual stages" items={animeSeries} />
+          )}
         </div>
       )}
     </div>

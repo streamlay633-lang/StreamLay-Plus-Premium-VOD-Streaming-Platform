@@ -1,140 +1,56 @@
-import React, { useState, useMemo } from 'react';
-import { MOCK_CONTENT, GENRES } from '../../data/mockContent';
-import { HeroBanner } from '../common/HeroBanner';
-import { ContentCarousel } from '../common/ContentCarousel';
-import { ContentCard } from '../common/ContentCard';
-import { Film, Filter, SlidersHorizontal, Sparkles } from 'lucide-react';
+import React from 'react';
+import { useApp } from '../../context/AppContext';
+import { MOCK_CONTENT } from '../../data/mockContent';
+import { Film, Play, Tv, ArrowRight } from 'lucide-react';
 
 export const MoviesView: React.FC = () => {
-  const [activeGenre, setActiveGenre] = useState<string>('All Genres');
-  const [sortBy, setSortBy] = useState<'rating' | 'year' | 'title'>('rating');
-  const [viewMode, setViewMode] = useState<'carousels' | 'grid'>('carousels');
+  const { setActivePage, openPlayer, startLivePlayback } = useApp();
+  const allMovies = MOCK_CONTENT.filter((c) => c.type === 'movie');
 
-  const allMovies = useMemo(() => {
-    return MOCK_CONTENT.filter((c) => c.type === 'movie');
-  }, []);
-
-  const featuredMovie = allMovies[0];
-
-  const filteredMovies = useMemo(() => {
-    let list = [...allMovies];
-    if (activeGenre !== 'All Genres') {
-      list = list.filter((m) => m.genres.includes(activeGenre));
-    }
-    list.sort((a, b) => {
-      if (sortBy === 'rating') return b.score - a.score;
-      if (sortBy === 'year') return b.year - a.year;
-      return a.title.localeCompare(b.title);
-    });
-    return list;
-  }, [allMovies, activeGenre, sortBy]);
-
-  const trendingMovies = allMovies.filter((m) => m.trending);
-  const popularMovies = allMovies.filter((m) => m.isPopular || m.score >= 8.5);
-  const newReleases = allMovies.filter((m) => m.isNew || m.year === 2026);
-  const topRated = [...allMovies].sort((a, b) => b.score - a.score);
-
-  // Genre specific slices
-  const sciFiMovies = allMovies.filter((m) => m.genres.includes('Sci-Fi'));
-  const actionMovies = allMovies.filter((m) => m.genres.includes('Action'));
-  const dramaMovies = allMovies.filter((m) => m.genres.includes('Drama'));
-  const thrillerMovies = allMovies.filter((m) => m.genres.includes('Thriller'));
+  const onegaiAipri = MOCK_CONTENT.find((c) => c.id === 'onegai-aipri');
 
   return (
-    <div className="pb-28 pt-0">
-      {/* Featured Movie Hero */}
-      <HeroBanner item={featuredMovie} featuredCategory="Featured Movie" />
+    <div className="min-h-[80vh] flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-24 pb-28">
+      <div className="max-w-md w-full text-center p-8 rounded-3xl bg-slate-900/80 border border-white/10 shadow-2xl backdrop-blur-xl">
+        <div className="w-16 h-16 rounded-2xl bg-purple-600/20 border border-purple-500/30 text-purple-400 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-purple-600/20">
+          <Film className="w-8 h-8" />
+        </div>
 
-      {/* Filter and View Mode Switcher */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 sm:-mt-10 relative z-30 mb-8">
-        <div className="p-4 rounded-2xl bg-slate-900/90 backdrop-blur-xl border border-white/10 shadow-2xl flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-            {['All Genres', 'Action', 'Sci-Fi', 'Thriller', 'Drama', 'Comedy', 'Horror', 'Documentary'].map((g) => (
-              <button
-                key={g}
-                onClick={() => {
-                  setActiveGenre(g);
-                  if (g !== 'All Genres') setViewMode('grid');
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-                  activeGenre === g
-                    ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                }`}
-              >
-                {g}
-              </button>
-            ))}
-          </div>
+        <h1 className="font-display text-2xl font-extrabold text-white mb-2">
+          No Feature Movies
+        </h1>
+        <p className="text-slate-400 text-sm leading-relaxed mb-6">
+          Feature movies have been removed from the catalog. Enjoy our featured TV series <strong className="text-white">Onegai Aipri</strong> or tune in to <strong className="text-white">Channel 0225 TV</strong> Live!
+        </p>
 
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 text-xs text-slate-400">
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>Sort:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-slate-800 text-slate-200 border border-white/10 rounded-md px-2 py-1 focus:outline-none"
-              >
-                <option value="rating">Top Rated</option>
-                <option value="year">Newest</option>
-                <option value="title">Title (A-Z)</option>
-              </select>
-            </div>
+        <div className="space-y-3">
+          {onegaiAipri && (
+            <button
+              onClick={() => openPlayer(onegaiAipri.id)}
+              className="w-full inline-flex items-center justify-center gap-2 py-3 px-5 rounded-xl font-bold text-white text-sm bg-purple-600 hover:bg-purple-500 shadow-lg shadow-purple-600/30 transition-all active:scale-95"
+            >
+              <Play className="w-4 h-4 fill-white" />
+              <span>Watch Onegai Aipri</span>
+            </button>
+          )}
 
-            <div className="flex items-center p-0.5 rounded-lg bg-slate-800 border border-white/10 text-xs">
-              <button
-                onClick={() => setViewMode('carousels')}
-                className={`px-2.5 py-1 rounded-md transition-all ${
-                  viewMode === 'carousels' ? 'bg-purple-600 text-white font-semibold' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Curated
-              </button>
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`px-2.5 py-1 rounded-md transition-all ${
-                  viewMode === 'grid' ? 'bg-purple-600 text-white font-semibold' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Grid
-              </button>
-            </div>
-          </div>
+          <button
+            onClick={() => setActivePage('live')}
+            className="w-full inline-flex items-center justify-center gap-2 py-3 px-5 rounded-xl font-semibold text-slate-200 text-sm bg-slate-800 hover:bg-slate-700 border border-white/10 transition-all active:scale-95"
+          >
+            <Tv className="w-4 h-4 text-rose-400" />
+            <span>Tune in to Channel 0225 TV</span>
+          </button>
+
+          <button
+            onClick={() => setActivePage('home')}
+            className="w-full text-xs text-slate-400 hover:text-white pt-2 transition-colors flex items-center justify-center gap-1"
+          >
+            <span>Return to Home</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
-
-      {/* Content Display: Carousels or Grid */}
-      {viewMode === 'grid' || activeGenre !== 'All Genres' ? (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-display text-xl font-bold text-white flex items-center gap-2">
-              <Film className="w-5 h-5 text-purple-400" />
-              {activeGenre === 'All Genres' ? 'All Feature Films' : `${activeGenre} Movies`}
-              <span className="text-xs text-slate-500 font-sans tabular-nums font-normal">
-                ({filteredMovies.length})
-              </span>
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
-            {filteredMovies.map((movie) => (
-              <ContentCard key={movie.id} item={movie} />
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <ContentCarousel title="Trending Movies" subtitle="Current cinema sensations" items={trendingMovies} />
-          <ContentCarousel title="Popular Movies" subtitle="Most watched blockbusters" items={popularMovies} />
-          <ContentCarousel title="New Releases" subtitle="2026 festival and theatrical releases" items={newReleases} />
-          <ContentCarousel title="Top Rated Cinema" subtitle="Highest IMDb critical acclaim" items={topRated} />
-          <ContentCarousel title="Action & High Octane" items={actionMovies} />
-          <ContentCarousel title="Sci-Fi & Cyberpunk Visions" items={sciFiMovies} />
-          <ContentCarousel title="Thrilling Mysteries" items={thrillerMovies} />
-          <ContentCarousel title="Dramatic Masterpieces" items={dramaMovies} />
-        </div>
-      )}
     </div>
   );
 };

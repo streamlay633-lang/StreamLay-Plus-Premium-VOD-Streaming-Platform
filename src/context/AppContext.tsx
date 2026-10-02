@@ -84,9 +84,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [myList, setMyList] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('streamlay_my_list');
-      return saved ? JSON.parse(saved) : ['cyber-odyssey', 'stellar-drift', 'abyssal-rift'];
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const validIds = new Set(MOCK_CONTENT.map((c) => c.id));
+          const filtered = parsed.filter((id) => validIds.has(id));
+          if (filtered.length > 0) return filtered;
+        }
+      }
+      return ['onegai-aipri', 'channel-0225-tv'];
     } catch {
-      return ['cyber-odyssey', 'stellar-drift', 'abyssal-rift'];
+      return ['onegai-aipri', 'channel-0225-tv'];
     }
   });
 
@@ -95,17 +103,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   >(() => {
     try {
       const saved = localStorage.getItem('streamlay_continue_watching');
-      return saved
-        ? JSON.parse(saved)
-        : [
-            { contentId: 'cyber-odyssey', progress: 45, updatedAt: Date.now() - 3600000 },
-            { contentId: 'stellar-drift', progress: 30, episodeId: 'sd-s1-e2', updatedAt: Date.now() - 7200000 },
-            { contentId: 'crimson-veil', progress: 72, updatedAt: Date.now() - 14400000 }
-          ];
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const validIds = new Set(MOCK_CONTENT.map((c) => c.id));
+          const filtered = parsed.filter((item) => validIds.has(item.contentId));
+          if (filtered.length > 0) return filtered;
+        }
+      }
+      return [
+        { contentId: 'onegai-aipri', progress: 35, episodeId: 'onegai-aipri-s1-e1', updatedAt: Date.now() - 3600000 }
+      ];
     } catch {
       return [
-        { contentId: 'cyber-odyssey', progress: 45, updatedAt: Date.now() - 3600000 },
-        { contentId: 'stellar-drift', progress: 30, episodeId: 'sd-s1-e2', updatedAt: Date.now() - 7200000 }
+        { contentId: 'onegai-aipri', progress: 35, episodeId: 'onegai-aipri-s1-e1', updatedAt: Date.now() - 3600000 }
       ];
     }
   });
@@ -113,9 +124,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [favoriteChannels, setFavoriteChannels] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('streamlay_fav_channels');
-      return saved ? JSON.parse(saved) : ['streamlay-premier-sports', 'cinema-plus-action'];
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const validIds = new Set(MOCK_CHANNELS.map((c) => c.id));
+          const filtered = parsed.filter((id) => validIds.has(id));
+          if (filtered.length > 0) return filtered;
+        }
+      }
+      return ['channel-0225-tv'];
     } catch {
-      return ['streamlay-premier-sports', 'cinema-plus-action'];
+      return ['channel-0225-tv'];
     }
   });
 
@@ -266,15 +285,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ];
     const targetServer = server || availableServers[0];
 
+    const isLive = item.type === 'live' || item.videoUrl.includes('.m3u8');
     setActivePlayback({
       title: episode ? `${item.title}: ${episode.title}` : item.title,
-      subtitle: episode ? `S${episode.seasonNumber} : E${episode.episodeNumber}` : `${item.year} · ${item.duration || ''}`,
+      subtitle: isLive ? (item.description || 'LIVE 24/7 BROADCAST') : (episode ? `S${episode.seasonNumber} : E${episode.episodeNumber}` : `${item.year} · ${item.duration || ''}`),
       videoUrl: targetServer ? targetServer.url : (episode ? episode.videoUrl : item.videoUrl),
-      posterUrl: episode ? episode.thumbnailUrl : item.backdropUrl,
+      posterUrl: episode ? episode.thumbnailUrl : (item.backdropUrl || item.posterUrl),
       contentId: item.id,
       episodeId: episode?.id,
-      isLive: false,
-      rating: item.rating,
+      isLive,
+      rating: isLive ? 'LIVE' : item.rating,
       genres: item.genres,
       currentServer: targetServer?.name || 'Primary Server',
       availableServers
@@ -301,7 +321,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       title: channel.name,
       subtitle: `LIVE: ${channel.currentProgram}`,
       videoUrl: channel.streamUrl,
-      posterUrl: '/assets/images/live_broadcast_studio_1790849707271.jpg',
+      posterUrl: channel.backdropUrl || channel.posterUrl || '/assets/images/live_broadcast_studio_1790849707271.jpg',
+      contentId: channel.id,
       isLive: true,
       rating: 'LIVE',
       genres: [channel.category, channel.resolution]
@@ -323,7 +344,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addToast('Signed out of StreamLay Plus', 'info');
   };
 
-  const selectedContent = selectedContentId ? MOCK_CONTENT.find((c) => c.id === selectedContentId) || null : null;
+  const selectedContent = selectedContentId
+    ? MOCK_CONTENT.find((c) => c.id === selectedContentId) ||
+      (() => {
+        const ch = MOCK_CHANNELS.find((c) => c.id === selectedContentId);
+        if (!ch) return null;
+        const item: ContentItem = {
+          id: ch.id,
+          title: ch.name,
+          type: 'live',
+          description: ch.description || ch.currentProgramDesc,
+          longDescription: `${ch.name} is streaming live 24/7. Current program: ${ch.currentProgram}. ${ch.currentProgramDesc}`,
+          backdropUrl: ch.backdropUrl || ch.posterUrl || '/assets/images/live_broadcast_studio_1790849707271.jpg',
+          posterUrl: ch.posterUrl || '/assets/images/live_broadcast_studio_1790849707271.jpg',
+          logoUrl: ch.logoUrl || ch.posterUrl,
+          year: 2026,
+          releaseDate: 'Live 24/7',
+          rating: 'TV-PG',
+          score: 9.6,
+          duration: '24/7 Live Stream',
+          genres: ['Live TV', ch.category],
+          cast: ['Live Network Hosts'],
+          director: `${ch.name} Broadcast Group`,
+          language: 'English',
+          videoUrl: ch.streamUrl,
+          serverName: 'Official Stream',
+          quality: [ch.resolution, 'Live Stream'],
+          featured: true
+        };
+        return item;
+      })()
+    : null;
   const selectedEpisode =
     selectedContent && selectedEpisodeId && selectedContent.seasons
       ? selectedContent.seasons.flatMap((s) => s.episodes).find((e) => e.id === selectedEpisodeId) || null

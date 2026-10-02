@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { MOCK_CONTENT } from '../../data/mockContent';
+import { MOCK_CONTENT, MOCK_CHANNELS } from '../../data/mockContent';
 import { Episode, Season } from '../../types';
 import { ContentCarousel } from '../common/ContentCarousel';
 import {
@@ -16,7 +16,10 @@ import {
   ArrowLeft,
   Volume2,
   Sparkles,
-  Layers
+  Layers,
+  Radio,
+  ExternalLink,
+  Signal
 } from 'lucide-react';
 
 export const ContentDetailsView: React.FC = () => {
@@ -24,6 +27,7 @@ export const ContentDetailsView: React.FC = () => {
     selectedContent,
     openPlayer,
     startPlayback,
+    startLivePlayback,
     toggleMyList,
     isInMyList,
     setActivePage,
@@ -49,6 +53,10 @@ export const ContentDetailsView: React.FC = () => {
 
   const inWatchlist = isInMyList(selectedContent.id);
   const isSeries = selectedContent.type === 'series';
+  const isLive = selectedContent.type === 'live' || selectedContent.id === 'channel-0225-tv';
+  const liveChannel = MOCK_CHANNELS.find(
+    (ch) => ch.id === selectedContent.id || ch.name.toLowerCase() === selectedContent.title.toLowerCase()
+  );
 
   // Similar titles
   const similarItems = MOCK_CONTENT.filter(
@@ -68,6 +76,14 @@ export const ContentDetailsView: React.FC = () => {
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
+  const handlePlayLiveOrVod = () => {
+    if (liveChannel) {
+      startLivePlayback(liveChannel);
+    } else {
+      openPlayer(selectedContent.id);
+    }
+  };
+
   return (
     <div className="min-h-screen pb-28 pt-0">
       {/* Cinematic Full-Width Backdrop Header */}
@@ -85,13 +101,13 @@ export const ContentDetailsView: React.FC = () => {
         <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-[#07090e]/80 to-transparent pointer-events-none" />
 
         {/* Back Navigation Button */}
-        <div className="absolute top-20 left-4 sm:left-8 z-30">
+        <div className="absolute top-20 left-4 sm:left-8 z-30 flex items-center gap-3">
           <button
-            onClick={() => setActivePage('home')}
+            onClick={() => setActivePage(isLive ? 'live' : 'home')}
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 hover:bg-black/90 text-slate-300 hover:text-white border border-white/15 text-xs font-semibold backdrop-blur-md transition-all active:scale-95"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Browse</span>
+            <span>{isLive ? 'Back to Live TV' : 'Back to Browse'}</span>
           </button>
         </div>
 
@@ -100,7 +116,16 @@ export const ContentDetailsView: React.FC = () => {
           <div className="max-w-3xl">
             {/* Tag label */}
             <div className="flex items-center gap-2 text-xs font-bold text-purple-400 uppercase tracking-widest mb-2">
-              <span>{isSeries ? 'StreamLay Original Series' : 'StreamLay Feature Film'}</span>
+              {isLive ? (
+                <span className="flex items-center gap-2 text-rose-400 font-extrabold bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/30">
+                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                  Live Broadcast Channel · Active 24/7
+                </span>
+              ) : isSeries ? (
+                <span>StreamLay Original Series</span>
+              ) : (
+                <span>StreamLay Feature Film</span>
+              )}
             </div>
 
             <h1 className="font-display text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-tight mb-3">
@@ -121,9 +146,13 @@ export const ContentDetailsView: React.FC = () => {
               </span>
               <span aria-hidden="true" className="text-slate-500">·</span>
               <span>
-                {selectedContent.type === 'movie'
-                  ? selectedContent.duration
-                  : `${selectedContent.seasonsCount || 1} Season${(selectedContent.seasonsCount || 1) > 1 ? 's' : ''}`}
+                {isLive ? (
+                  <span className="text-emerald-400 font-bold uppercase tracking-wider">24/7 Live Feed</span>
+                ) : selectedContent.type === 'movie' ? (
+                  selectedContent.duration
+                ) : (
+                  `${selectedContent.seasonsCount || 1} Season${(selectedContent.seasonsCount || 1) > 1 ? 's' : ''}`
+                )}
               </span>
               {selectedContent.subtitles && selectedContent.subtitles.length > 0 && (
                 <>
@@ -150,14 +179,14 @@ export const ContentDetailsView: React.FC = () => {
             {/* CTA action bar */}
             <div className="flex flex-wrap items-center gap-3">
               <button
-                onClick={() => openPlayer(selectedContent.id)}
+                onClick={handlePlayLiveOrVod}
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm shadow-xl shadow-purple-600/40 hover:scale-105 active:scale-95 transition-all"
               >
                 <Play className="w-4 h-4 fill-white" />
-                <span>Play Now</span>
+                <span>{isLive ? 'Watch Live Stream' : 'Play Now'}</span>
               </button>
 
-              {/* Direct Server Selector */}
+              {/* Direct Server Selector if multiple servers exist */}
               {selectedContent.servers && selectedContent.servers.length > 1 && (
                 <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/60 border border-white/15 backdrop-blur-md">
                   <span className="text-[11px] text-slate-400 font-semibold px-2 hidden sm:inline">Server:</span>
@@ -173,6 +202,16 @@ export const ContentDetailsView: React.FC = () => {
                     </button>
                   ))}
                 </div>
+              )}
+
+              {isLive && (
+                <button
+                  onClick={() => setActivePage('live')}
+                  className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-black/60 hover:bg-black/80 border border-white/20 text-slate-200 hover:text-white text-sm font-semibold transition-all active:scale-95 backdrop-blur-md"
+                >
+                  <Tv className="w-4 h-4 text-purple-400" />
+                  <span>Open in Live TV</span>
+                </button>
               )}
 
               <button
@@ -389,14 +428,106 @@ export const ContentDetailsView: React.FC = () => {
               </div>
             )}
 
+            {/* Live TV Channel Guide & Broadcast Lineup for Live Channels */}
+            {isLive && (
+              <div className="mb-10 space-y-6">
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <h3 className="font-display text-xl font-bold text-white flex items-center gap-2">
+                    <Radio className="w-5 h-5 text-rose-500 animate-pulse" />
+                    Live Program Schedule
+                  </h3>
+                  <span className="text-xs text-slate-400 font-medium">Updated Real-Time</span>
+                </div>
+
+                {/* On Air Now Banner */}
+                <div className="p-5 rounded-2xl bg-gradient-to-r from-purple-950/70 via-slate-900 to-slate-900 border border-purple-500/40 shadow-xl relative overflow-hidden">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="px-2 py-0.5 rounded bg-rose-600 text-white text-[10px] font-bold tracking-wider uppercase animate-pulse">
+                          ON AIR NOW
+                        </span>
+                        <span className="text-xs text-purple-300 font-semibold">
+                          {liveChannel?.currentProgramTime || 'Live 24/7'}
+                        </span>
+                      </div>
+                      <h4 className="font-display text-lg sm:text-xl font-bold text-white mb-1">
+                        {liveChannel?.currentProgram || selectedContent.title + ' Live Broadcast'}
+                      </h4>
+                      <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
+                        {liveChannel?.currentProgramDesc || selectedContent.description}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={handlePlayLiveOrVod}
+                      className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-purple-600/30 hover:scale-105 active:scale-95 transition-all shrink-0"
+                    >
+                      <Play className="w-4 h-4 fill-white" />
+                      <span>Watch Stream</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Program Slots */}
+                {liveChannel?.schedule && liveChannel.schedule.length > 0 && (
+                  <div className="space-y-2.5">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-slate-400" />
+                      Broadcast Timeline
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {liveChannel.schedule.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-white/5 hover:border-white/15 transition-all"
+                        >
+                          <span className="text-xs font-bold text-purple-400 w-12 shrink-0 tabular-nums">
+                            {item.time}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <h5 className="font-semibold text-xs sm:text-sm text-slate-200 truncate">
+                              {item.title}
+                            </h5>
+                            <span className="text-[11px] text-slate-500">
+                              {item.genre} · {item.durationMinutes} min
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Live Feed Technical Specs Box */}
+                <div className="p-4 rounded-xl bg-slate-900/40 border border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs">
+                  <div className="flex items-center gap-2">
+                    <Signal className="w-4 h-4 text-emerald-400 animate-pulse" />
+                    <span className="text-slate-300">
+                      Live Stream Status: <span className="text-emerald-400 font-bold">Online & Active</span>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 text-slate-400">
+                    <span>Protocol: <strong className="text-white">HLS (.m3u8)</strong></span>
+                    <span>·</span>
+                    <span>Format: <strong className="text-white">1080p FHD</strong></span>
+                    <span>·</span>
+                    <span>Latency: <strong className="text-white">Ultra-Low</strong></span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* You May Also Like Section */}
-            <div className="mt-10">
-              <ContentCarousel
-                title="You May Also Like"
-                subtitle="Similar high-rated titles in this genre"
-                items={similarItems}
-              />
-            </div>
+            {similarItems.length > 0 && (
+              <div className="mt-10">
+                <ContentCarousel
+                  title="You May Also Like"
+                  subtitle="More entertainment on StreamLay Plus"
+                  items={similarItems}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

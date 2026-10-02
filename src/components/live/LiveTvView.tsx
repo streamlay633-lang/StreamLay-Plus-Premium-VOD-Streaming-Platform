@@ -1,18 +1,19 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { MOCK_CHANNELS } from '../../data/mockContent';
 import { LiveChannel } from '../../types';
-import { Play, Star, Maximize, Volume2, VolumeX, Radio, Clock, Calendar, Check, Users } from 'lucide-react';
+import { Play, Star, Maximize, Volume2, VolumeX, Radio, Clock, Calendar, Check, Users, Info } from 'lucide-react';
+import Hls from 'hls.js';
 
 export const LiveTvView: React.FC = () => {
-  const { startLivePlayback, favoriteChannels, toggleFavoriteChannel, isFavoriteChannel } = useApp();
+  const { startLivePlayback, favoriteChannels, toggleFavoriteChannel, isFavoriteChannel, openDetails } = useApp();
   const [selectedChannel, setSelectedChannel] = useState<LiveChannel>(MOCK_CHANNELS[0]);
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [isPlayingPreview, setIsPlayingPreview] = useState<boolean>(true);
   const [isMuted, setIsMuted] = useState<boolean>(true);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const categories = ['All', 'Sports', 'News', 'Cinema', 'Documentary', 'Music', 'Entertainment', 'Favorites'];
+  const categories = ['All', 'Entertainment', 'Music', 'Favorites'];
 
   const filteredChannels = MOCK_CHANNELS.filter((ch) => {
     if (activeCategory === 'Favorites') return isFavoriteChannel(ch.id);
@@ -20,12 +21,57 @@ export const LiveTvView: React.FC = () => {
     return ch.category === activeCategory;
   });
 
+  // HLS stream playback support for preview video
+  useEffect(() => {
+    let hls: Hls | null = null;
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (selectedChannel.streamUrl.includes('.m3u8')) {
+      if (Hls.isSupported()) {
+        hls = new Hls({
+          enableWorker: true,
+          lowLatencyMode: true,
+          backBufferLength: 30
+        });
+        hls.loadSource(selectedChannel.streamUrl);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          video.play().catch(() => {});
+        });
+        hls.on(Hls.Events.ERROR, (_event, data) => {
+          if (data.fatal) {
+            switch (data.type) {
+              case Hls.ErrorTypes.NETWORK_ERROR:
+                hls?.startLoad();
+                break;
+              case Hls.ErrorTypes.MEDIA_ERROR:
+                hls?.recoverMediaError();
+                break;
+              default:
+                hls?.destroy();
+                break;
+            }
+          }
+        });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = selectedChannel.streamUrl;
+        video.play().catch(() => {});
+      }
+    } else {
+      video.src = selectedChannel.streamUrl;
+      video.play().catch(() => {});
+    }
+
+    return () => {
+      if (hls) {
+        hls.destroy();
+      }
+    };
+  }, [selectedChannel.streamUrl]);
+
   const handleSelectChannel = (ch: LiveChannel) => {
     setSelectedChannel(ch);
-    if (videoRef.current) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play().catch(() => {});
-    }
   };
 
   const isCurrentFav = isFavoriteChannel(selectedChannel.id);
@@ -43,13 +89,13 @@ export const LiveTvView: React.FC = () => {
             </span>
           </h1>
           <p className="text-slate-400 text-xs sm:text-sm mt-1">
-            Over 100+ live broadcast streams, 24/7 sports, news, and cinema channels.
+            Channel 0225 TV live 24/7 broadcast streaming in crystal-clear high definition.
           </p>
         </div>
 
         <div className="hidden sm:flex items-center gap-2 text-xs text-slate-400">
           <Radio className="w-4 h-4 text-purple-400 animate-pulse" />
-          <span>Simulated Live Stream Buffer</span>
+          <span>Active Live Broadcast Feed</span>
         </div>
       </div>
 
@@ -59,11 +105,11 @@ export const LiveTvView: React.FC = () => {
           {/* Active video element for channel preview */}
           <video
             ref={videoRef}
-            src={selectedChannel.streamUrl}
             autoPlay
             playsInline
             loop
             muted={isMuted}
+            poster={selectedChannel.backdropUrl || selectedChannel.posterUrl}
             className="w-full h-full object-cover"
           />
 
@@ -74,7 +120,16 @@ export const LiveTvView: React.FC = () => {
           {/* Top Channel Bar */}
           <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
             <div className="flex items-center gap-3 bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/15">
-              <span className="text-xl">{selectedChannel.logo}</span>
+              {selectedChannel.posterUrl ? (
+                <img
+                  src={selectedChannel.posterUrl}
+                  alt={selectedChannel.name}
+                  referrerPolicy="no-referrer"
+                  className="w-7 h-7 rounded-lg object-cover"
+                />
+              ) : (
+                <span className="text-xl">{selectedChannel.logo}</span>
+              )}
               <div>
                 <span className="text-xs font-bold text-white block leading-tight">
                   {selectedChannel.name}
@@ -108,7 +163,7 @@ export const LiveTvView: React.FC = () => {
           <div className="absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4 z-10">
             <div className="max-w-xl">
               <div className="flex items-center gap-2 mb-1.5 text-xs">
-                <span className="px-2 py-0.5 rounded bg-rose-600 text-white font-bold text-[10px] tracking-wide">
+                <span className="px-2 py-0.5 rounded bg-rose-600 text-white font-bold text-[10px] tracking-wide animate-pulse">
                   ON AIR
                 </span>
                 <span className="text-purple-300 font-semibold">{selectedChannel.currentProgramTime}</span>
@@ -140,11 +195,20 @@ export const LiveTvView: React.FC = () => {
               </button>
 
               <button
+                onClick={() => openDetails(selectedChannel.id)}
+                className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm backdrop-blur-md border border-white/15 transition-all active:scale-95"
+                title="View Channel Details"
+              >
+                <Info className="w-4 h-4 text-purple-300" />
+                <span>Details</span>
+              </button>
+
+              <button
                 onClick={() => startLivePlayback(selectedChannel)}
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm shadow-xl shadow-purple-600/40 hover:scale-105 active:scale-95 transition-all"
               >
                 <Play className="w-4 h-4 fill-white" />
-                <span>Watch Full Live Feed</span>
+                <span>Watch Live</span>
               </button>
             </div>
           </div>
@@ -200,8 +264,17 @@ export const LiveTvView: React.FC = () => {
                         : 'bg-slate-900/80 hover:bg-slate-800/90 border-white/5'
                     }`}
                   >
-                    <div className="w-11 h-11 rounded-xl bg-slate-800 flex items-center justify-center text-xl shrink-0 border border-white/10">
-                      {channel.logo}
+                    <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-xl shrink-0 border border-white/10 overflow-hidden relative">
+                      {channel.posterUrl ? (
+                        <img
+                          src={channel.posterUrl}
+                          alt={channel.name}
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span>{channel.logo}</span>
+                      )}
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -209,16 +282,28 @@ export const LiveTvView: React.FC = () => {
                         <span className="font-display font-semibold text-white text-sm truncate">
                           {channel.name}
                         </span>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFavoriteChannel(channel.id);
-                          }}
-                          className="p-1 text-slate-400 hover:text-amber-400 transition-colors"
-                          title="Favorite channel"
-                        >
-                          <Star className={`w-3.5 h-3.5 ${isFav ? 'text-amber-400 fill-amber-400' : ''}`} />
-                        </button>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openDetails(channel.id);
+                            }}
+                            className="p-1 text-slate-400 hover:text-purple-300 transition-colors"
+                            title="Channel Details"
+                          >
+                            <Info className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleFavoriteChannel(channel.id);
+                            }}
+                            className="p-1 text-slate-400 hover:text-amber-400 transition-colors"
+                            title="Favorite channel"
+                          >
+                            <Star className={`w-3.5 h-3.5 ${isFav ? 'text-amber-400 fill-amber-400' : ''}`} />
+                          </button>
+                        </div>
                       </div>
 
                       <div className="text-xs text-slate-300 truncate font-medium mt-0.5">
@@ -250,7 +335,13 @@ export const LiveTvView: React.FC = () => {
                   EPG Guide: {selectedChannel.name}
                 </h3>
               </div>
-              <span className="text-xs text-slate-400 font-medium">Today's Schedule</span>
+              <button
+                onClick={() => openDetails(selectedChannel.id)}
+                className="text-xs text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-1"
+              >
+                <span>Channel Details</span>
+                <Info className="w-3.5 h-3.5" />
+              </button>
             </div>
 
             {/* "On Now" Spotlight */}
@@ -301,16 +392,26 @@ export const LiveTvView: React.FC = () => {
           </div>
 
           {/* Quick Play Trigger in EPG */}
-          <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+          <div className="mt-6 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
             <span className="text-xs text-slate-400">
               HD Broadcast Stream · Low Latency Engine
             </span>
-            <button
-              onClick={() => startLivePlayback(selectedChannel)}
-              className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow-md active:scale-95"
-            >
-              Play Channel
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => openDetails(selectedChannel.id)}
+                className="px-3.5 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/15 transition-all flex items-center gap-1.5 active:scale-95"
+              >
+                <Info className="w-3.5 h-3.5 text-purple-300" />
+                <span>Channel Details</span>
+              </button>
+              <button
+                onClick={() => startLivePlayback(selectedChannel)}
+                className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow-md active:scale-95 flex items-center gap-1.5"
+              >
+                <Play className="w-3.5 h-3.5 fill-white" />
+                <span>Play Channel</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

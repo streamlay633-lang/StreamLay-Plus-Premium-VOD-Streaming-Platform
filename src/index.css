@@ -48,3 +48,21 @@
 input[type="range"] {
   accent-color: #a855f7;
 }
+
+/* Interactive cursor pointer defaults for UI */
+button,
+[role="button"],
+a,
+select,
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"],
+label,
+summary,
+.cursor-pointer {
+  cursor: pointer;
+}
+
