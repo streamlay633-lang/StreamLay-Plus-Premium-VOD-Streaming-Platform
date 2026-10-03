@@ -9,7 +9,7 @@ interface HeroBannerProps {
 }
 
 export const HeroBanner: React.FC<HeroBannerProps> = ({ item, featuredCategory }) => {
-  const { openPlayer, openDetails, toggleMyList, isInMyList } = useApp();
+  const { openPlayer, openDetails, toggleMyList, isInMyList, isRtl, t } = useApp();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
 
@@ -37,8 +37,14 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ item, featuredCategory }
           }`}
         />
 
-        {/* Cinematic gradient overlays: Left text scrim & Bottom smooth fade to canvas */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#07090e] via-[#07090e]/75 to-transparent z-10 w-full md:w-3/4" />
+        {/* Cinematic gradient overlays: Text scrim & Bottom smooth fade to canvas */}
+        <div
+          className={`absolute inset-0 z-10 w-full md:w-3/4 ${
+            isRtl
+              ? 'bg-gradient-to-l from-[#07090e] via-[#07090e]/75 to-transparent'
+              : 'bg-gradient-to-r from-[#07090e] via-[#07090e]/75 to-transparent'
+          }`}
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-[#07090e] via-[#07090e]/40 to-transparent z-10" />
         <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-[#07090e]/80 to-transparent z-10 pointer-events-none" />
       </div>
@@ -49,7 +55,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ item, featuredCategory }
           {/* Subtle Category or Original text label */}
           <div className="flex items-center gap-2 mb-2 text-xs font-semibold uppercase tracking-wider text-purple-400">
             <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
-            <span>{featuredCategory || 'Featured Blockbuster'}</span>
+            <span>{featuredCategory || t('home.featuredCategory')}</span>
           </div>
 
           {/* Title */}
@@ -72,10 +78,10 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ item, featuredCategory }
             <span aria-hidden="true" className="text-slate-500">·</span>
             <span>
               {item.type === 'live'
-                ? '24/7 Live'
+                ? `24/7 ${t('label.live')}`
                 : item.type === 'movie'
                 ? item.duration
-                : `${item.seasonsCount || 1} Season${(item.seasonsCount || 1) > 1 ? 's' : ''}`}
+                : `${item.seasonsCount || 1} ${(item.seasonsCount || 1) > 1 ? t('label.seasons') : t('label.seasonSingular')}`}
             </span>
             {item.quality?.[0] && (
               <>
@@ -97,7 +103,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ item, featuredCategory }
               className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white text-slate-950 font-bold text-sm hover:bg-slate-200 transition-all shadow-xl shadow-white/10 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-white"
             >
               <Play className="w-4 h-4 fill-slate-950 text-slate-950" />
-              <span>Watch Now</span>
+              <span>{t('action.watchNow')}</span>
             </button>
 
             <button
@@ -105,7 +111,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ item, featuredCategory }
               className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/90 text-white font-medium text-sm backdrop-blur-md border border-white/15 transition-all hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <Info className="w-4 h-4" />
-              <span>More Info</span>
+              <span>{t('action.moreInfo')}</span>
             </button>
 
             <button
@@ -115,18 +121,18 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ item, featuredCategory }
                   ? 'bg-purple-600/30 border-purple-500 text-purple-300'
                   : 'bg-black/40 border-white/20 text-slate-300 hover:text-white hover:border-white'
               }`}
-              aria-label={inWatchlist ? 'Remove from My List' : 'Add to My List'}
-              title={inWatchlist ? 'In My List' : 'Add to My List'}
+              aria-label={inWatchlist ? t('action.removeFromMyList') : t('action.addToMyList')}
+              title={inWatchlist ? t('action.inMyList') : t('action.addToMyList')}
             >
               {inWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
             </button>
 
             {/* Mute ambient indicator */}
-            <div className="hidden sm:flex ml-auto items-center">
+            <div className={`hidden sm:flex items-center ${isRtl ? 'mr-auto' : 'ml-auto'}`}>
               <button
                 onClick={() => setIsMuted(!isMuted)}
                 className="p-2.5 rounded-full bg-black/40 hover:bg-black/60 border border-white/15 text-slate-300 hover:text-white transition-all text-xs"
-                title={isMuted ? 'Unmute Ambient Sound' : 'Mute Ambient Sound'}
+                title={isMuted ? 'Unmute' : 'Mute'}
                 aria-label="Toggle sound preview"
               >
                 {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-purple-400" />}

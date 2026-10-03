@@ -3,12 +3,12 @@ import { useApp } from '../../context/AppContext';
 import { CheckCircle2, Info, AlertTriangle, X } from 'lucide-react';
 
 export const ToastContainer: React.FC = () => {
-  const { toasts, removeToast } = useApp();
+  const { toasts, removeToast, isRtl } = useApp();
 
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-50 flex flex-col gap-2 max-w-sm pointer-events-none">
+    <div className={`fixed bottom-20 md:bottom-8 ${isRtl ? 'left-4 md:left-8' : 'right-4 md:right-8'} z-50 flex flex-col gap-2 max-w-sm pointer-events-none`}>
       {toasts.map((toast) => {
         let Icon = Info;
         let iconColor = 'text-blue-400';

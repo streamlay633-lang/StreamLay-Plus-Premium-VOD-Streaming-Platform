@@ -6,6 +6,12 @@
     --font-body: 'Plus Jakarta Sans', sans-serif;
   }
 
+  /* Arabic typography override */
+  html[dir="rtl"] {
+    --font-display: 'Cairo', sans-serif;
+    --font-body: 'Cairo', sans-serif;
+  }
+
   body {
     font-family: var(--font-body);
     background-color: #07090e;
@@ -16,6 +22,13 @@
   h1, h2, h3, .font-display {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
+  }
+
+  html[dir="rtl"] h1,
+  html[dir="rtl"] h2,
+  html[dir="rtl"] h3,
+  html[dir="rtl"] .font-display {
+    letter-spacing: normal;
   }
 }
 

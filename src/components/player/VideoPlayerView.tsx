@@ -19,6 +19,7 @@ import {
   SkipBack,
   Layers,
   ArrowLeft,
+  ArrowRight,
   Info,
   Check,
   FastForward,
@@ -42,7 +43,9 @@ export const VideoPlayerView: React.FC = () => {
     updateProgress,
     setActivePage,
     addToast,
-    switchServer
+    switchServer,
+    isRtl,
+    t
   } = useApp();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -486,7 +489,7 @@ export const VideoPlayerView: React.FC = () => {
       {isLoading && !isEmbed && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 pointer-events-none z-30">
           <div className="w-14 h-14 rounded-full border-4 border-purple-500/20 border-t-purple-500 animate-spin mb-3" />
-          <span className="text-white text-xs font-semibold tracking-wider uppercase">Loading Stream...</span>
+          <span className="text-white text-xs font-semibold tracking-wider uppercase">{t('player.loadingStream')}</span>
         </div>
       )}
 
@@ -494,9 +497,9 @@ export const VideoPlayerView: React.FC = () => {
       {hasError && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-30 p-6 text-center">
           <AlertCircle className="w-12 h-12 text-rose-500 mb-3" />
-          <h3 className="text-lg font-bold text-white mb-2">Video playback interrupted</h3>
+          <h3 className="text-lg font-bold text-white mb-2">{t('player.playbackInterrupted')}</h3>
           <p className="text-slate-400 text-sm max-w-md mb-4">
-            The media stream could not be loaded. Please verify your connection and retry.
+            {t('player.mediaErrorDesc')}
           </p>
           <button
             onClick={() => {
@@ -513,7 +516,7 @@ export const VideoPlayerView: React.FC = () => {
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-sm transition-all shadow-lg shadow-purple-600/30"
           >
             <RefreshCw className="w-4 h-4" />
-            <span>Retry Playback</span>
+            <span>{t('player.retryPlayback')}</span>
           </button>
         </div>
       )}
@@ -524,11 +527,11 @@ export const VideoPlayerView: React.FC = () => {
           onClick={(e) => {
             e.stopPropagation();
             seekRelative(80);
-            addToast('Skipped intro', 'info');
+            addToast(t('player.skipIntro'), 'info');
           }}
-          className="absolute bottom-24 right-8 z-30 px-5 py-2.5 rounded-xl bg-slate-900/90 hover:bg-purple-600 border border-white/20 hover:border-purple-500 text-white text-xs font-bold tracking-wider uppercase backdrop-blur-md shadow-2xl transition-all active:scale-95 animate-fade-in"
+          className={`absolute bottom-24 ${isRtl ? 'left-8' : 'right-8'} z-30 px-5 py-2.5 rounded-xl bg-slate-900/90 hover:bg-purple-600 border border-white/20 hover:border-purple-500 text-white text-xs font-bold tracking-wider uppercase backdrop-blur-md shadow-2xl transition-all active:scale-95 animate-fade-in`}
         >
-          Skip Intro (+80s)
+          {t('player.skipIntro')} (+80s)
         </button>
       )}
 
@@ -545,10 +548,10 @@ export const VideoPlayerView: React.FC = () => {
               handleExit();
             }}
             className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all active:scale-95 shadow-lg backdrop-blur-md border border-white/10"
-            aria-label="Exit player"
-            title="Exit player (Esc)"
+            aria-label={t('player.exitPlayer')}
+            title={`${t('player.exitPlayer')} (Esc)`}
           >
-            <ArrowLeft className="w-5 h-5" />
+            {isRtl ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
           </button>
 
           <div>
@@ -559,7 +562,7 @@ export const VideoPlayerView: React.FC = () => {
               {activePlayback?.isLive && (
                 <span className="px-2 py-0.5 rounded bg-rose-600 text-white font-bold text-[10px] tracking-wider animate-pulse flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-                  LIVE
+                  {t('player.liveStream')}
                 </span>
               )}
 
@@ -575,22 +578,22 @@ export const VideoPlayerView: React.FC = () => {
                       setShowSubtitlesMenu(false);
                     }}
                     className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-white font-semibold text-[11px] tracking-wider border border-white/20 shadow-lg shadow-purple-600/10 transition-all hover:scale-105 active:scale-95"
-                    title="Select Episode"
+                    title={t('player.selectEpisode')}
                   >
                     <Layers className="w-3.5 h-3.5 text-purple-300" />
                     <span>
-                      {currentEpisode ? `E${currentEpisode.episodeNumber}: ${currentEpisode.duration}` : 'Episodes'}
+                      {currentEpisode ? `E${currentEpisode.episodeNumber}: ${currentEpisode.duration}` : t('player.episodes')}
                     </span>
                   </button>
 
                   {showEpisodesMenu && (
                     <div
                       onClick={(e) => e.stopPropagation()}
-                      className="absolute top-full left-0 mt-2 w-72 p-2.5 rounded-2xl bg-slate-950/95 border border-white/20 backdrop-blur-xl shadow-2xl text-xs z-50 animate-fade-in"
+                      className={`absolute top-full ${isRtl ? 'right-0' : 'left-0'} mt-2 w-72 p-2.5 rounded-2xl bg-slate-950/95 border border-white/20 backdrop-blur-xl shadow-2xl text-xs z-50 animate-fade-in`}
                     >
                       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-1 flex items-center justify-between border-b border-white/10 pb-1.5">
-                        <span>Select Episode</span>
-                        <span className="text-purple-400">Season 1</span>
+                        <span>{t('player.selectEpisode')}</span>
+                        <span className="text-purple-400">{t('details.season1')}</span>
                       </div>
                       <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
                         {allEpisodes.map((ep) => {
@@ -616,7 +619,10 @@ export const VideoPlayerView: React.FC = () => {
                                   alt={ep.title}
                                   referrerPolicy="no-referrer"
                                   onError={(e) => {
-                                    if (selectedContent?.backdropUrl) {
+                                    const match = ep.id.match(/onegai-aipri-s1-e(\d+)/);
+                                    if (match && !e.currentTarget.src.includes(`onegai_aipri_ep${match[1]}.jpg`)) {
+                                      e.currentTarget.src = `/assets/images/onegai_aipri_ep${match[1]}.jpg`;
+                                    } else if (selectedContent?.backdropUrl) {
                                       e.currentTarget.src = selectedContent.backdropUrl;
                                     }
                                   }}
@@ -631,7 +637,7 @@ export const VideoPlayerView: React.FC = () => {
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center justify-between gap-1">
                                   <span className="font-semibold text-xs truncate">
-                                    Ep {ep.episodeNumber}: {ep.title}
+                                    {t('details.episodePrefix') || 'Ep'} {ep.episodeNumber}: {ep.title}
                                   </span>
                                   {isCurrent && <Check className="w-3.5 h-3.5 shrink-0 text-white" />}
                                 </div>
@@ -661,28 +667,26 @@ export const VideoPlayerView: React.FC = () => {
                       setShowSubtitlesMenu(false);
                     }}
                     className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-600/80 hover:bg-purple-600 text-white font-semibold text-[11px] tracking-wider border border-purple-400/40 shadow-lg shadow-purple-600/30 transition-all hover:scale-105 active:scale-95"
-                    title="Switch streaming server (LuluStream / DoodStream)"
+                    title={t('player.selectServer')}
                   >
                     <Server className="w-3.5 h-3.5 text-purple-200" />
-                    <span>Server: {currentServerName}</span>
+                    <span>{t('player.server')}: {currentServerName}</span>
                   </button>
 
                   {showServerMenu && (
                     <div
                       onClick={(e) => e.stopPropagation()}
-                      className="absolute top-full left-0 mt-2 w-60 p-2.5 rounded-2xl bg-slate-950/95 border border-white/20 backdrop-blur-xl shadow-2xl text-xs z-50 animate-fade-in"
+                      className={`absolute top-full ${isRtl ? 'right-0' : 'left-0'} mt-2 w-60 p-2.5 rounded-2xl bg-slate-950/95 border border-white/20 backdrop-blur-xl shadow-2xl text-xs z-50 animate-fade-in`}
                     >
                       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-1 flex items-center justify-between">
-                        <span>Select Video Server</span>
-                        <span className="text-purple-400">Multi-Source</span>
+                        <span>{t('player.selectServer')}</span>
+                        <span className="text-purple-400">{t('player.multiSource')}</span>
                       </div>
                       <div className="space-y-1">
                         {availableServers.map((srv) => {
-                          const isCurrent =
-                            activePlayback?.currentServer === srv.name ||
-                            (!activePlayback?.currentServer && videoSource === srv.url) ||
-                            (srv.id === 'doodstream' && (videoSource.includes('playmogo') || videoSource.includes('dood'))) ||
-                            (srv.id === 'lulustream' && videoSource.includes('lulust'));
+                          const isCurrent = activePlayback?.currentServer
+                            ? activePlayback.currentServer.toLowerCase() === srv.name.toLowerCase()
+                            : (videoSource === srv.url || (srv.id === 'doodstream' && (videoSource.includes('playmogo') || videoSource.includes('dood'))) || (srv.id === 'lulustream' && videoSource.includes('lulust')));
                           return (
                             <button
                               key={srv.id}
@@ -729,7 +733,7 @@ export const VideoPlayerView: React.FC = () => {
                 handlePrevEpisode();
               }}
               className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-white text-xs font-semibold border border-white/15 shadow-lg transition-all active:scale-95"
-              title={`Prev: Ep ${prevEpisode.episodeNumber} - ${prevEpisode.title}`}
+              title={`${t('player.prevEpisode')}: Ep ${prevEpisode.episodeNumber} - ${prevEpisode.title}`}
             >
               <SkipBack className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Ep {prevEpisode.episodeNumber}</span>
@@ -743,7 +747,7 @@ export const VideoPlayerView: React.FC = () => {
                 handleNextEpisode();
               }}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-lg shadow-purple-600/30 transition-all active:scale-95 mr-1"
-              title={`Next: Ep ${nextEpisode.episodeNumber} - ${nextEpisode.title}`}
+              title={`${t('player.nextEpisode')}: Ep ${nextEpisode.episodeNumber} - ${nextEpisode.title}`}
             >
               <SkipForward className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Ep {nextEpisode.episodeNumber}</span>
@@ -761,10 +765,10 @@ export const VideoPlayerView: React.FC = () => {
                 setActivePage('live');
               }}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600/80 hover:bg-purple-600 text-white text-xs font-semibold backdrop-blur-md border border-purple-400/30 transition-all active:scale-95 shadow-md shadow-purple-600/20"
-              title="Open Live TV Guide"
+              title={t('player.liveTvGuide')}
             >
               <Tv className="w-3.5 h-3.5 text-white" />
-              <span className="hidden sm:inline">Live TV Guide</span>
+              <span className="hidden sm:inline">{t('player.liveTvGuide')}</span>
             </button>
           )}
 
@@ -779,10 +783,10 @@ export const VideoPlayerView: React.FC = () => {
                 openDetails(activePlayback.contentId!);
               }}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold backdrop-blur-md border border-white/15 transition-all active:scale-95"
-              title="View Title Details"
+              title={t('player.details')}
             >
               <Info className="w-3.5 h-3.5 text-purple-300" />
-              <span className="hidden sm:inline">Details</span>
+              <span className="hidden sm:inline">{t('player.details')}</span>
             </button>
           )}
 
@@ -949,7 +953,7 @@ export const VideoPlayerView: React.FC = () => {
                   title={`Next: ${nextEpisode.title}`}
                 >
                   <SkipForward className="w-3.5 h-3.5" />
-                  <span>Next Episode</span>
+                  <span>{t('player.nextEpisode')}</span>
                 </button>
               )}
 
@@ -963,24 +967,24 @@ export const VideoPlayerView: React.FC = () => {
                   className={`p-2 rounded-lg transition-colors ${
                     showSubtitlesMenu ? 'bg-purple-600 text-white' : 'text-slate-300 hover:text-white'
                   }`}
-                  title="Subtitles & Audio"
+                  title={t('player.subtitlesCc')}
                 >
                   <Subtitles className="w-4 h-4" />
                 </button>
 
                 {showSubtitlesMenu && (
-                  <div className="absolute bottom-12 right-0 w-64 p-3 rounded-2xl bg-slate-950/95 border border-white/20 backdrop-blur-xl shadow-2xl text-xs z-50 animate-fade-in">
+                  <div className={`absolute bottom-12 ${isRtl ? 'left-0' : 'right-0'} w-64 p-3 rounded-2xl bg-slate-950/95 border border-white/20 backdrop-blur-xl shadow-2xl text-xs z-50 animate-fade-in`}>
                     <div className="font-bold text-white mb-2 pb-1 border-b border-white/10">
-                      Subtitles (CC)
+                      {t('player.subtitlesCc')}
                     </div>
                     <div className="space-y-1 mb-3">
-                      {['Off', 'English [CC]', 'Spanish', 'French', 'German'].map((sub) => (
+                      {['Off', 'English [CC]', 'Spanish', 'French', 'Arabic'].map((sub) => (
                         <button
                           key={sub}
                           onClick={() => {
                             setSelectedSubtitle(sub);
                             setShowSubtitlesMenu(false);
-                            addToast(`Subtitles set to ${sub}`, 'info');
+                            addToast(`${t('player.subtitlesCc')}: ${sub}`, 'info');
                           }}
                           className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between ${
                             selectedSubtitle === sub
@@ -988,28 +992,28 @@ export const VideoPlayerView: React.FC = () => {
                               : 'text-slate-400 hover:bg-white/5 hover:text-white'
                           }`}
                         >
-                          <span>{sub}</span>
+                          <span>{sub === 'Off' ? t('action.off') || 'Off' : sub}</span>
                           {selectedSubtitle === sub && <Check className="w-3.5 h-3.5 text-purple-400" />}
                         </button>
                       ))}
                     </div>
 
                     <div className="font-bold text-white mb-2 pb-1 border-b border-white/10">
-                      Audio Track
+                      {t('player.audioTrack')}
                     </div>
                     <div className="space-y-1">
                       {[
                         'English Original (5.1)',
-                        'Spanish (Stereo)',
                         'French (Stereo)',
-                        'Director Commentary'
+                        'Arabic (Stereo)',
+                        'Japanese Original'
                       ].map((aud) => (
                         <button
                           key={aud}
                           onClick={() => {
                             setSelectedAudio(aud);
                             setShowSubtitlesMenu(false);
-                            addToast(`Audio track set to ${aud}`, 'info');
+                            addToast(`${t('player.audioTrack')}: ${aud}`, 'info');
                           }}
                           className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between ${
                             selectedAudio === aud
@@ -1036,15 +1040,15 @@ export const VideoPlayerView: React.FC = () => {
                   className={`p-2 rounded-lg transition-colors ${
                     showSettingsMenu ? 'bg-purple-600 text-white' : 'text-slate-300 hover:text-white'
                   }`}
-                  title="Playback Settings"
+                  title={t('player.playbackSettings')}
                 >
                   <Settings className="w-4 h-4" />
                 </button>
 
                 {showSettingsMenu && (
-                  <div className="absolute bottom-12 right-0 w-56 p-3 rounded-2xl bg-slate-950/95 border border-white/20 backdrop-blur-xl shadow-2xl text-xs z-50 animate-fade-in">
+                  <div className={`absolute bottom-12 ${isRtl ? 'left-0' : 'right-0'} w-56 p-3 rounded-2xl bg-slate-950/95 border border-white/20 backdrop-blur-xl shadow-2xl text-xs z-50 animate-fade-in`}>
                     <div className="font-bold text-white mb-2 pb-1 border-b border-white/10">
-                      Video Quality
+                      {t('player.videoQuality')}
                     </div>
                     <div className="space-y-1 mb-3">
                       {['Auto (4K UHD)', '1080p Full HD', '720p HD', 'Data Saver (480p)'].map((q) => (
@@ -1053,7 +1057,7 @@ export const VideoPlayerView: React.FC = () => {
                           onClick={() => {
                             setSelectedQuality(q);
                             setShowSettingsMenu(false);
-                            addToast(`Quality set to ${q}`, 'info');
+                            addToast(`${t('player.videoQuality')}: ${q}`, 'info');
                           }}
                           className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between ${
                             selectedQuality === q
@@ -1068,7 +1072,7 @@ export const VideoPlayerView: React.FC = () => {
                     </div>
 
                     <div className="font-bold text-white mb-2 pb-1 border-b border-white/10">
-                      Playback Speed
+                      {t('player.playbackSpeed')}
                     </div>
                     <div className="grid grid-cols-3 gap-1">
                       {[0.5, 0.75, 1, 1.25, 1.5, 2].map((s) => (
@@ -1093,7 +1097,7 @@ export const VideoPlayerView: React.FC = () => {
               <button
                 onClick={togglePictureInPicture}
                 className="p-2 text-slate-300 hover:text-white transition-colors hidden sm:block"
-                title="Picture in Picture"
+                title={t('player.pictureInPicture')}
               >
                 <FastForward className="w-4 h-4" />
               </button>
@@ -1102,8 +1106,8 @@ export const VideoPlayerView: React.FC = () => {
               <button
                 onClick={toggleFullscreen}
                 className="p-2 text-slate-300 hover:text-white transition-colors"
-                title={isFullscreen ? 'Exit Fullscreen (F)' : 'Fullscreen (F)'}
-                aria-label="Toggle Fullscreen"
+                title={isFullscreen ? `${t('player.fullscreen')} (F)` : `${t('player.fullscreen')} (F)`}
+                aria-label={t('player.fullscreen')}
               >
                 {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
               </button>
@@ -1118,12 +1122,12 @@ export const VideoPlayerView: React.FC = () => {
           <div className="pointer-events-auto flex items-center gap-2 flex-wrap">
             <div className="px-3 py-1.5 rounded-xl bg-black/85 backdrop-blur-md border border-white/10 text-xs text-slate-300 flex items-center gap-2 shadow-xl">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Active: <strong className="text-white font-semibold">{currentServerName}</strong></span>
+              <span>{t('player.server')}: <strong className="text-white font-semibold">{currentServerName}</strong></span>
             </div>
 
             {/* Quick Switch Server Buttons */}
             <div className="flex items-center gap-1 p-1 rounded-xl bg-black/85 backdrop-blur-md border border-white/15 shadow-xl">
-              <span className="text-[10px] text-slate-400 font-bold uppercase px-2 hidden sm:inline">Server:</span>
+              <span className="text-[10px] text-slate-400 font-bold uppercase px-2 hidden sm:inline">{t('player.server')}:</span>
               {availableServers.map((srv) => {
                 const isActive =
                   activePlayback?.currentServer === srv.name ||
@@ -1150,7 +1154,7 @@ export const VideoPlayerView: React.FC = () => {
             {/* Quick Episode Switcher in bottom bar if series has episodes */}
             {allEpisodes.length > 1 && (
               <div className="flex items-center gap-1 p-1 rounded-xl bg-black/85 backdrop-blur-md border border-white/15 shadow-xl">
-                <span className="text-[10px] text-purple-300 font-bold uppercase px-2 hidden sm:inline">Episodes:</span>
+                <span className="text-[10px] text-purple-300 font-bold uppercase px-2 hidden sm:inline">{t('player.episodes')}:</span>
                 {allEpisodes.map((ep) => {
                   const isEpActive = ep.id === currentEpisode?.id;
                   return (
@@ -1182,7 +1186,7 @@ export const VideoPlayerView: React.FC = () => {
               <button
                 onClick={handlePrevEpisode}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-white text-xs font-semibold border border-white/15 shadow-xl transition-all hover:scale-105 active:scale-95"
-                title={`Prev: Ep ${prevEpisode.episodeNumber} - ${prevEpisode.title}`}
+                title={`${t('player.prevEpisode')}: Ep ${prevEpisode.episodeNumber} - ${prevEpisode.title}`}
               >
                 <SkipBack className="w-3.5 h-3.5" />
                 <span>Ep {prevEpisode.episodeNumber}</span>
@@ -1193,10 +1197,10 @@ export const VideoPlayerView: React.FC = () => {
               <button
                 onClick={handleNextEpisode}
                 className="pointer-events-auto flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-xl shadow-purple-600/30 transition-all hover:scale-105 active:scale-95"
-                title={`Next: Ep ${nextEpisode.episodeNumber} - ${nextEpisode.title}`}
+                title={`${t('player.nextEpisode')}: Ep ${nextEpisode.episodeNumber} - ${nextEpisode.title}`}
               >
                 <SkipForward className="w-4 h-4" />
-                <span>Next: Ep {nextEpisode.episodeNumber}</span>
+                <span>{t('player.nextEpisode')}: Ep {nextEpisode.episodeNumber}</span>
               </button>
             )}
           </div>
@@ -1213,49 +1217,49 @@ export const VideoPlayerView: React.FC = () => {
             <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
               <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
                 <Keyboard className="w-5 h-5 text-purple-400" />
-                Keyboard Shortcuts
+                {t('player.keyboardShortcuts')}
               </h3>
               <button
                 onClick={() => setShowShortcutsModal(false)}
                 className="text-slate-400 hover:text-white text-xs px-2 py-1 rounded bg-slate-900 border border-white/10"
               >
-                Close (Esc)
+                {t('action.close')} (Esc)
               </button>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="p-2.5 rounded-lg bg-slate-900/80 border border-white/5 flex items-center justify-between">
-                <span className="text-slate-400">Play / Pause</span>
+                <span className="text-slate-400">{t('player.playPause')}</span>
                 <kbd className="px-2 py-0.5 rounded bg-slate-800 text-white font-mono border border-white/10">
                   Space / K
                 </kbd>
               </div>
               <div className="p-2.5 rounded-lg bg-slate-900/80 border border-white/5 flex items-center justify-between">
-                <span className="text-slate-400">Fullscreen</span>
+                <span className="text-slate-400">{t('player.fullscreen')}</span>
                 <kbd className="px-2 py-0.5 rounded bg-slate-800 text-white font-mono border border-white/10">
                   F
                 </kbd>
               </div>
               <div className="p-2.5 rounded-lg bg-slate-900/80 border border-white/5 flex items-center justify-between">
-                <span className="text-slate-400">Mute Toggle</span>
+                <span className="text-slate-400">{t('player.muteToggle')}</span>
                 <kbd className="px-2 py-0.5 rounded bg-slate-800 text-white font-mono border border-white/10">
                   M
                 </kbd>
               </div>
               <div className="p-2.5 rounded-lg bg-slate-900/80 border border-white/5 flex items-center justify-between">
-                <span className="text-slate-400">Seek ±10s</span>
+                <span className="text-slate-400">{t('player.seek10s')}</span>
                 <kbd className="px-2 py-0.5 rounded bg-slate-800 text-white font-mono border border-white/10">
                   ← / →
                 </kbd>
               </div>
               <div className="p-2.5 rounded-lg bg-slate-900/80 border border-white/5 flex items-center justify-between">
-                <span className="text-slate-400">Volume ±10%</span>
+                <span className="text-slate-400">{t('player.volume10')}</span>
                 <kbd className="px-2 py-0.5 rounded bg-slate-800 text-white font-mono border border-white/10">
                   ↑ / ↓
                 </kbd>
               </div>
               <div className="p-2.5 rounded-lg bg-slate-900/80 border border-white/5 flex items-center justify-between">
-                <span className="text-slate-400">Exit Player</span>
+                <span className="text-slate-400">{t('player.exitPlayer')}</span>
                 <kbd className="px-2 py-0.5 rounded bg-slate-800 text-white font-mono border border-white/10">
                   Esc
                 </kbd>

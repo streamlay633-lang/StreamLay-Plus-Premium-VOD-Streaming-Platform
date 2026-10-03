@@ -1,12 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { MOCK_CONTENT, MOCK_CHANNELS, GENRES } from '../../data/mockContent';
+import { getLocalizedContent } from '../../i18n/translations';
 import { ContentCard } from '../common/ContentCard';
 import { ContentItem, LiveChannel } from '../../types';
 import { Search, X, Filter, Tv, Film, Sparkles, SlidersHorizontal } from 'lucide-react';
 
 export const SearchView: React.FC = () => {
-  const { searchQuery, setSearchQuery, openDetails, startLivePlayback, isFavoriteChannel, toggleFavoriteChannel } = useApp();
+  const { searchQuery, setSearchQuery, openDetails, startLivePlayback, isFavoriteChannel, toggleFavoriteChannel, language, isRtl, t } = useApp();
   const [activeTab, setActiveTab] = useState<'all' | 'movie' | 'series' | 'live'>('all');
   const [selectedGenre, setSelectedGenre] = useState<string>('All Genres');
   const [selectedRating, setSelectedRating] = useState<string>('All');
@@ -30,7 +31,7 @@ export const SearchView: React.FC = () => {
   }, [searchQuery, activeTab, selectedGenre, selectedRating, selectedYear, sortBy]);
 
   const filteredItems = useMemo(() => {
-    let list: ContentItem[] = [...MOCK_CONTENT];
+    let list: ContentItem[] = MOCK_CONTENT.map((c) => getLocalizedContent(c, language));
 
     // Filter by Tab
     if (activeTab === 'movie') {
@@ -75,7 +76,7 @@ export const SearchView: React.FC = () => {
     });
 
     return list;
-  }, [searchQuery, activeTab, selectedGenre, selectedRating, selectedYear, sortBy]);
+  }, [searchQuery, activeTab, selectedGenre, selectedRating, selectedYear, sortBy, language]);
 
   const filteredChannels = useMemo(() => {
     if (activeTab === 'movie' || activeTab === 'series') return [];
@@ -103,22 +104,22 @@ export const SearchView: React.FC = () => {
       {/* Top Search Input Box */}
       <div className="max-w-3xl mx-auto mb-8">
         <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+          <div className={`absolute inset-y-0 ${isRtl ? 'right-0 pr-4' : 'left-0 pl-4'} flex items-center pointer-events-none text-slate-400`}>
             <Search className="w-5 h-5 text-purple-400" />
           </div>
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search movies, TV shows, genres, actors, live channels..."
-            className="w-full pl-12 pr-12 py-4 rounded-2xl bg-slate-900/90 border border-white/10 text-white placeholder-slate-500 text-base sm:text-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 shadow-2xl transition-all"
+            placeholder={t('search.placeholder')}
+            className={`w-full ${isRtl ? 'pr-12 pl-12' : 'pl-12 pr-12'} py-4 rounded-2xl bg-slate-900/90 border border-white/10 text-white placeholder-slate-500 text-base sm:text-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 shadow-2xl transition-all`}
             autoFocus
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-white transition-colors"
-              aria-label="Clear search input"
+              className={`absolute inset-y-0 ${isRtl ? 'left-0 pl-4' : 'right-0 pr-4'} flex items-center text-slate-400 hover:text-white transition-colors`}
+              aria-label={t('action.clear') || 'Clear search'}
             >
               <X className="w-5 h-5" />
             </button>
@@ -129,7 +130,7 @@ export const SearchView: React.FC = () => {
         <div className="flex items-center gap-2 mt-3 overflow-x-auto no-scrollbar pb-1 text-xs">
           <span className="text-slate-400 flex items-center gap-1 shrink-0 font-medium">
             <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-            Trending:
+            {t('search.trending')}:
           </span>
           {suggestions.map((item) => (
             <button
@@ -145,13 +146,13 @@ export const SearchView: React.FC = () => {
 
       {/* Tabs & Filter Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4 mb-6">
-        {/* Filter Tabs (Interactive segmented buttons allowed by skill) */}
+        {/* Filter Tabs */}
         <div className="flex items-center p-1 bg-slate-900/80 rounded-xl border border-white/10">
           {(
             [
-              { id: 'all', label: 'All Results' },
-              { id: 'series', label: 'Series' },
-              { id: 'live', label: 'Live TV' },
+              { id: 'all', label: t('search.allResults') },
+              { id: 'series', label: t('search.series') },
+              { id: 'live', label: t('search.liveTv') },
             ] as const
           ).map((tab) => (
             <button
@@ -179,7 +180,7 @@ export const SearchView: React.FC = () => {
             }`}
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
-            <span>Filters</span>
+            <span>{t('search.filters')}</span>
           </button>
         </div>
       </div>
@@ -188,12 +189,13 @@ export const SearchView: React.FC = () => {
       {showFilters && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-xl bg-slate-900/60 border border-white/10 mb-6 animate-fade-in text-xs">
           <div>
-            <label className="block text-slate-400 mb-1.5 font-medium">Genre</label>
+            <label className="block text-slate-400 mb-1.5 font-medium">{t('search.genre')}</label>
             <select
               value={selectedGenre}
               onChange={(e) => setSelectedGenre(e.target.value)}
               className="w-full bg-slate-800 text-slate-200 border border-white/10 rounded-lg p-2 focus:outline-none focus:border-purple-500"
             >
+              <option value="All Genres">{t('search.allGenres')}</option>
               {GENRES.map((g) => (
                 <option key={g} value={g}>
                   {g}
@@ -203,13 +205,13 @@ export const SearchView: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-slate-400 mb-1.5 font-medium">Rating</label>
+            <label className="block text-slate-400 mb-1.5 font-medium">{t('search.rating')}</label>
             <select
               value={selectedRating}
               onChange={(e) => setSelectedRating(e.target.value)}
               className="w-full bg-slate-800 text-slate-200 border border-white/10 rounded-lg p-2 focus:outline-none focus:border-purple-500"
             >
-              <option value="All">All Ratings</option>
+              <option value="All">{t('search.allRatings')}</option>
               <option value="PG">PG</option>
               <option value="PG-13">PG-13</option>
               <option value="TV-14">TV-14</option>
@@ -219,13 +221,13 @@ export const SearchView: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-slate-400 mb-1.5 font-medium">Year</label>
+            <label className="block text-slate-400 mb-1.5 font-medium">{t('search.year')}</label>
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
               className="w-full bg-slate-800 text-slate-200 border border-white/10 rounded-lg p-2 focus:outline-none focus:border-purple-500"
             >
-              <option value="All">All Years</option>
+              <option value="All">{t('search.allYears')}</option>
               <option value="2026">2026</option>
               <option value="2025">2025</option>
               <option value="2024">2024</option>
@@ -233,15 +235,15 @@ export const SearchView: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-slate-400 mb-1.5 font-medium">Sort By</label>
+            <label className="block text-slate-400 mb-1.5 font-medium">{t('search.sortBy')}</label>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as 'rating' | 'year' | 'title')}
               className="w-full bg-slate-800 text-slate-200 border border-white/10 rounded-lg p-2 focus:outline-none focus:border-purple-500"
             >
-              <option value="rating">Top Rated (IMDb)</option>
-              <option value="year">Release Year (Newest)</option>
-              <option value="title">Title (A-Z)</option>
+              <option value="rating">{t('search.topRated')}</option>
+              <option value="year">{t('search.releaseYear')}</option>
+              <option value="title">{t('search.titleAz')}</option>
             </select>
           </div>
         </div>
@@ -250,11 +252,10 @@ export const SearchView: React.FC = () => {
       {/* Results Count & Query text */}
       <div className="flex items-center justify-between text-xs text-slate-400 mb-6">
         <span>
-          Showing <strong className="text-white tabular-nums">{totalResults}</strong> titles
+          {t('search.showingResults', { count: String(totalResults) })}{' '}
           {searchQuery && (
             <span>
-              {' '}
-              for "<span className="text-purple-300 font-semibold">{searchQuery}</span>"
+              {t('search.forQuery')}{' '}"<span className="text-purple-300 font-semibold">{searchQuery}</span>"
             </span>
           )}
         </span>
@@ -268,7 +269,7 @@ export const SearchView: React.FC = () => {
             }}
             className="text-purple-400 hover:text-purple-300 font-medium hover:underline"
           >
-            Reset Filters
+            {t('search.resetFilters')}
           </button>
         )}
       </div>
@@ -290,9 +291,9 @@ export const SearchView: React.FC = () => {
           <div className="w-16 h-16 rounded-2xl bg-purple-600/10 border border-purple-500/20 text-purple-400 flex items-center justify-center mx-auto mb-4">
             <Search className="w-8 h-8" />
           </div>
-          <h3 className="font-display text-xl font-bold text-white mb-2">No results found</h3>
+          <h3 className="font-display text-xl font-bold text-white mb-2">{t('search.noResults')}</h3>
           <p className="text-sm text-slate-400 mb-6">
-            We couldn't find matches for "{searchQuery}". Try checking for typos or searching for another genre or director.
+            {t('search.noResultsDesc', { query: searchQuery })}
           </p>
           <div className="flex flex-wrap justify-center gap-2">
             {['Onegai Aipri', 'Channel 0225 TV', 'Anime', 'Live TV'].map((term) => (
@@ -301,7 +302,7 @@ export const SearchView: React.FC = () => {
                 onClick={() => setSearchQuery(term)}
                 className="px-3 py-1.5 rounded-lg bg-slate-900 border border-white/10 text-xs text-slate-300 hover:text-white hover:border-purple-500"
               >
-                Search "{term}"
+                {t('action.searchFor', { term }) || `Search "${term}"`}
               </button>
             ))}
           </div>
@@ -314,7 +315,7 @@ export const SearchView: React.FC = () => {
             <div>
               <h2 className="font-display text-lg font-bold text-white mb-4 flex items-center gap-2">
                 <Tv className="w-4 h-4 text-purple-400" />
-                Live Channels ({filteredChannels.length})
+                {t('search.liveChannels')} ({filteredChannels.length})
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredChannels.map((channel) => (
@@ -332,7 +333,7 @@ export const SearchView: React.FC = () => {
                           {channel.name}
                         </h4>
                         <span className="px-1.5 py-0.5 rounded bg-rose-600/20 text-rose-400 text-[10px] font-bold border border-rose-500/30">
-                          LIVE
+                          {t('details.liveChannelBadge')}
                         </span>
                       </div>
                       <p className="text-xs text-slate-300 truncate mt-0.5">
@@ -356,7 +357,7 @@ export const SearchView: React.FC = () => {
               {activeTab === 'all' && filteredChannels.length > 0 && (
                 <h2 className="font-display text-lg font-bold text-white mb-4 flex items-center gap-2">
                   <Film className="w-4 h-4 text-indigo-400" />
-                  Series ({filteredItems.length})
+                  {t('search.series')} ({filteredItems.length})
                 </h2>
               )}
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-5">

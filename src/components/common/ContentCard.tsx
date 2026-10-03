@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ContentItem } from '../../types';
 import { useApp } from '../../context/AppContext';
+import { getLocalizedContent } from '../../i18n/translations';
 import { Play, Plus, Check, Info, Star, Film, Tv, Radio } from 'lucide-react';
 
 interface ContentCardProps {
@@ -12,15 +13,18 @@ interface ContentCardProps {
 }
 
 export const ContentCard: React.FC<ContentCardProps> = ({
-  item,
+  item: rawItem,
   showProgress = false,
   progressOverride,
   onRemoveContinue,
   aspectRatio = 'poster'
 }) => {
-  const { openDetails, openPlayer, toggleMyList, isInMyList, continueWatching } = useApp();
+  const { openDetails, openPlayer, toggleMyList, isInMyList, continueWatching, language, isRtl, t } = useApp();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+
+  // Localize content item based on current language
+  const item = getLocalizedContent(rawItem, language);
 
   const inWatchlist = isInMyList(item.id);
   const continueItem = continueWatching.find((c) => c.contentId === item.id);
@@ -85,11 +89,11 @@ export const ContentCard: React.FC<ContentCardProps> = ({
         )}
 
         {/* Top Indicators: subtle unboxed badge */}
-        <div className="absolute top-2 left-2 z-10 pointer-events-none flex items-center gap-1.5">
+        <div className={`absolute top-2 z-10 pointer-events-none flex items-center gap-1.5 ${isRtl ? 'right-2' : 'left-2'}`}>
           {item.type === 'live' ? (
             <span className="px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase text-white bg-rose-600/90 backdrop-blur-md rounded border border-rose-500/40 flex items-center gap-1 shadow-md">
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-              LIVE
+              {t('label.live')}
             </span>
           ) : item.quality?.[0] ? (
             <span className="px-1.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase text-slate-200 bg-black/60 backdrop-blur-md rounded border border-white/10">
@@ -108,9 +112,9 @@ export const ContentCard: React.FC<ContentCardProps> = ({
               }}
               className="p-2.5 rounded-full bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/50 hover:scale-110 active:scale-95 transition-all"
               aria-label={`Play ${item.title}`}
-              title="Play Now"
+              title={t('action.playNow')}
             >
-              <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+              <Play className={`w-3.5 h-3.5 fill-current ${isRtl ? 'mr-0.5' : 'ml-0.5'}`} />
             </button>
 
             <button
@@ -123,8 +127,8 @@ export const ContentCard: React.FC<ContentCardProps> = ({
                   ? 'bg-purple-600/30 border-purple-500 text-purple-300'
                   : 'bg-black/60 border-white/20 text-slate-200 hover:border-white hover:text-white'
               }`}
-              aria-label={inWatchlist ? 'Remove from My List' : 'Add to My List'}
-              title={inWatchlist ? 'Remove from My List' : 'Add to My List'}
+              aria-label={inWatchlist ? t('action.removeFromMyList') : t('action.addToMyList')}
+              title={inWatchlist ? t('action.inMyList') : t('action.addToMyList')}
             >
               {inWatchlist ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
             </button>
@@ -134,9 +138,11 @@ export const ContentCard: React.FC<ContentCardProps> = ({
                 e.stopPropagation();
                 openDetails(item.id);
               }}
-              className="p-2 rounded-full bg-black/60 border border-white/20 text-slate-200 hover:border-white hover:text-white transition-all hover:scale-110 active:scale-95 ml-auto"
+              className={`p-2 rounded-full bg-black/60 border border-white/20 text-slate-200 hover:border-white hover:text-white transition-all hover:scale-110 active:scale-95 ${
+                isRtl ? 'mr-auto' : 'ml-auto'
+              }`}
               aria-label={`Details for ${item.title}`}
-              title="Details & Episodes"
+              title={t('action.details')}
             >
               <Info className="w-3.5 h-3.5" />
             </button>
@@ -159,7 +165,7 @@ export const ContentCard: React.FC<ContentCardProps> = ({
           </div>
 
           <div className="text-[10px] text-slate-400 truncate mt-0.5">
-            {item.genres.slice(0, 2).join(', ')}
+            {item.genres.slice(0, 2).map((g: string) => t(`genre.${g}`) || g).join(', ')}
           </div>
         </div>
 
@@ -184,10 +190,10 @@ export const ContentCard: React.FC<ContentCardProps> = ({
           <span aria-hidden="true">·</span>
           <span>
             {item.type === 'live'
-              ? '24/7 Live'
+              ? `24/7 ${t('label.live')}`
               : item.type === 'movie'
-              ? item.duration || 'Movie'
-              : `${item.seasonsCount || 1} Season${(item.seasonsCount || 1) > 1 ? 's' : ''}`}
+              ? item.duration || t('label.movie')
+              : `${item.seasonsCount || 1} ${(item.seasonsCount || 1) > 1 ? t('label.seasons') : t('label.seasonSingular')}`}
           </span>
           <span aria-hidden="true">·</span>
           <span className="text-slate-400 flex items-center gap-0.5">

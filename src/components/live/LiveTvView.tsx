@@ -6,14 +6,19 @@ import { Play, Star, Maximize, Volume2, VolumeX, Radio, Clock, Calendar, Check, 
 import Hls from 'hls.js';
 
 export const LiveTvView: React.FC = () => {
-  const { startLivePlayback, favoriteChannels, toggleFavoriteChannel, isFavoriteChannel, openDetails } = useApp();
+  const { startLivePlayback, favoriteChannels, toggleFavoriteChannel, isFavoriteChannel, openDetails, isRtl, t } = useApp();
   const [selectedChannel, setSelectedChannel] = useState<LiveChannel>(MOCK_CHANNELS[0]);
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [isPlayingPreview, setIsPlayingPreview] = useState<boolean>(true);
   const [isMuted, setIsMuted] = useState<boolean>(true);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const categories = ['All', 'Entertainment', 'Music', 'Favorites'];
+  const categories = [
+    { id: 'All', label: t('cat.All') },
+    { id: 'Entertainment', label: t('cat.Entertainment') },
+    { id: 'Music', label: t('cat.Music') },
+    { id: 'Favorites', label: `★ ${t('cat.Favorites')} (${favoriteChannels.length})` }
+  ];
 
   const filteredChannels = MOCK_CHANNELS.filter((ch) => {
     if (activeCategory === 'Favorites') return isFavoriteChannel(ch.id);
@@ -82,20 +87,20 @@ export const LiveTvView: React.FC = () => {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-display text-2xl sm:text-4xl font-extrabold text-white tracking-tight flex items-center gap-3">
-            <span>Live TV</span>
+            <span>{t('live.pageTitle')}</span>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-600/20 border border-rose-500/40 text-rose-400 text-xs font-bold tracking-wider animate-pulse">
               <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-              LIVE
+              {t('label.live')}
             </span>
           </h1>
           <p className="text-slate-400 text-xs sm:text-sm mt-1">
-            Channel 0225 TV live 24/7 broadcast streaming in crystal-clear high definition.
+            {t('live.subtitle')}
           </p>
         </div>
 
         <div className="hidden sm:flex items-center gap-2 text-xs text-slate-400">
           <Radio className="w-4 h-4 text-purple-400 animate-pulse" />
-          <span>Active Live Broadcast Feed</span>
+          <span>{t('live.feedStatus')}</span>
         </div>
       </div>
 
@@ -134,7 +139,7 @@ export const LiveTvView: React.FC = () => {
                 <span className="text-xs font-bold text-white block leading-tight">
                   {selectedChannel.name}
                 </span>
-                <span className="text-[10px] text-slate-400">CH {selectedChannel.number}</span>
+                <span className="text-[10px] text-slate-400 tabular-nums">CH {selectedChannel.number}</span>
               </div>
             </div>
 
@@ -164,7 +169,7 @@ export const LiveTvView: React.FC = () => {
             <div className="max-w-xl">
               <div className="flex items-center gap-2 mb-1.5 text-xs">
                 <span className="px-2 py-0.5 rounded bg-rose-600 text-white font-bold text-[10px] tracking-wide animate-pulse">
-                  ON AIR
+                  {t('label.onAir')}
                 </span>
                 <span className="text-purple-300 font-semibold">{selectedChannel.currentProgramTime}</span>
                 <span aria-hidden="true" className="text-slate-500">·</span>
@@ -189,7 +194,7 @@ export const LiveTvView: React.FC = () => {
                     ? 'bg-amber-500/20 border-amber-500/50 text-amber-400'
                     : 'bg-black/60 border-white/20 text-slate-300 hover:text-white'
                 }`}
-                title={isCurrentFav ? 'Remove Favorite' : 'Add to Favorites'}
+                title={isCurrentFav ? t('action.removeFromMyList') : t('action.addToMyList')}
               >
                 <Star className={`w-4 h-4 ${isCurrentFav ? 'fill-amber-400' : ''}`} />
               </button>
@@ -197,18 +202,18 @@ export const LiveTvView: React.FC = () => {
               <button
                 onClick={() => openDetails(selectedChannel.id)}
                 className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm backdrop-blur-md border border-white/15 transition-all active:scale-95"
-                title="View Channel Details"
+                title={t('action.channelDetails')}
               >
                 <Info className="w-4 h-4 text-purple-300" />
-                <span>Details</span>
+                <span>{t('action.details')}</span>
               </button>
 
               <button
                 onClick={() => startLivePlayback(selectedChannel)}
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm shadow-xl shadow-purple-600/40 hover:scale-105 active:scale-95 transition-all"
               >
-                <Play className="w-4 h-4 fill-white" />
-                <span>Watch Live</span>
+                <Play className={`w-4 h-4 fill-white ${isRtl ? 'mr-0.5' : 'ml-0.5'}`} />
+                <span>{t('action.watchLive')}</span>
               </button>
             </div>
           </div>
@@ -218,18 +223,18 @@ export const LiveTvView: React.FC = () => {
       {/* Category Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 mb-6">
         {categories.map((cat) => {
-          const isActive = activeCategory === cat;
+          const isActive = activeCategory === cat.id;
           return (
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
                 isActive
                   ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
                   : 'bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-white/5'
               }`}
             >
-              {cat === 'Favorites' ? `★ Favorites (${favoriteChannels.length})` : cat}
+              {cat.label}
             </button>
           );
         })}
@@ -240,14 +245,14 @@ export const LiveTvView: React.FC = () => {
         {/* Channel Cards (Left Column, 5 cols) */}
         <div className="lg:col-span-5 space-y-3">
           <h3 className="font-display text-sm font-bold uppercase tracking-wider text-slate-400 mb-2">
-            Available Channels ({filteredChannels.length})
+            {t('live.availableChannels')} ({filteredChannels.length})
           </h3>
 
           <div className="space-y-2.5 max-h-[550px] overflow-y-auto pr-1">
             {filteredChannels.length === 0 ? (
               <div className="p-8 text-center bg-slate-900/50 rounded-xl border border-white/5">
-                <p className="text-slate-400 text-sm">No favorite channels added yet.</p>
-                <p className="text-xs text-slate-500 mt-1">Click the star icon to pin your favorite channels here.</p>
+                <p className="text-slate-400 text-sm">{t('live.noFavorites')}</p>
+                <p className="text-xs text-slate-500 mt-1">{t('live.noFavoritesDesc')}</p>
               </div>
             ) : (
               filteredChannels.map((channel) => {
@@ -289,7 +294,7 @@ export const LiveTvView: React.FC = () => {
                               openDetails(channel.id);
                             }}
                             className="p-1 text-slate-400 hover:text-purple-300 transition-colors"
-                            title="Channel Details"
+                            title={t('action.channelDetails')}
                           >
                             <Info className="w-3.5 h-3.5" />
                           </button>
@@ -311,7 +316,7 @@ export const LiveTvView: React.FC = () => {
                       </div>
 
                       <div className="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5">
-                        <span className="text-rose-400 font-bold uppercase">Live</span>
+                        <span className="text-rose-400 font-bold uppercase">{t('label.live')}</span>
                         <span aria-hidden="true">·</span>
                         <span>{channel.currentProgramTime}</span>
                         <span aria-hidden="true">·</span>
@@ -332,14 +337,14 @@ export const LiveTvView: React.FC = () => {
               <div className="flex items-center gap-2.5">
                 <Calendar className="w-4 h-4 text-purple-400" />
                 <h3 className="font-display font-bold text-white text-base">
-                  EPG Guide: {selectedChannel.name}
+                  {t('live.epgGuide')}: {selectedChannel.name}
                 </h3>
               </div>
               <button
                 onClick={() => openDetails(selectedChannel.id)}
                 className="text-xs text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-1"
               >
-                <span>Channel Details</span>
+                <span>{t('action.channelDetails')}</span>
                 <Info className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -349,9 +354,9 @@ export const LiveTvView: React.FC = () => {
               <div className="flex items-center justify-between text-xs mb-1">
                 <span className="text-purple-300 font-bold uppercase tracking-wider flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-                  On Now ({selectedChannel.currentProgramTime})
+                  {t('live.onNow')} ({selectedChannel.currentProgramTime})
                 </span>
-                <span className="text-slate-400">{selectedChannel.category}</span>
+                <span className="text-slate-400">{t(`cat.${selectedChannel.category}`) || selectedChannel.category}</span>
               </div>
               <h4 className="font-display text-lg font-bold text-white mb-1">
                 {selectedChannel.currentProgram}
@@ -365,7 +370,7 @@ export const LiveTvView: React.FC = () => {
             <div>
               <h4 className="font-display text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-slate-400" />
-                Coming Up Next
+                {t('live.comingUpNext')}
               </h4>
 
               <div className="space-y-3">
@@ -382,7 +387,7 @@ export const LiveTvView: React.FC = () => {
                         {item.title}
                       </h5>
                       <span className="text-[11px] text-slate-500">
-                        {item.genre} · {item.durationMinutes} min
+                        {t(`genre.${item.genre}`) || item.genre} · {item.durationMinutes} {t('label.min')}
                       </span>
                     </div>
                   </div>
@@ -394,7 +399,7 @@ export const LiveTvView: React.FC = () => {
           {/* Quick Play Trigger in EPG */}
           <div className="mt-6 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
             <span className="text-xs text-slate-400">
-              HD Broadcast Stream · Low Latency Engine
+              {t('live.hdNote')}
             </span>
             <div className="flex items-center gap-2">
               <button
@@ -402,14 +407,14 @@ export const LiveTvView: React.FC = () => {
                 className="px-3.5 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/15 transition-all flex items-center gap-1.5 active:scale-95"
               >
                 <Info className="w-3.5 h-3.5 text-purple-300" />
-                <span>Channel Details</span>
+                <span>{t('action.channelDetails')}</span>
               </button>
               <button
                 onClick={() => startLivePlayback(selectedChannel)}
                 className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow-md active:scale-95 flex items-center gap-1.5"
               >
-                <Play className="w-3.5 h-3.5 fill-white" />
-                <span>Play Channel</span>
+                <Play className={`w-3.5 h-3.5 fill-white ${isRtl ? 'mr-0.5' : 'ml-0.5'}`} />
+                <span>{t('action.playChannel')}</span>
               </button>
             </div>
           </div>

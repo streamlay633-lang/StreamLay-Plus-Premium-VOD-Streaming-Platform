@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { MOCK_CONTENT } from '../../data/mockContent';
+import { getLocalizedContent } from '../../i18n/translations';
 import { ContentCard } from '../common/ContentCard';
 import { Bookmark, Film, Tv, Play } from 'lucide-react';
 
 export const MyListView: React.FC = () => {
-  const { myList, setActivePage, openPlayer } = useApp();
+  const { myList, setActivePage, openPlayer, language, isRtl, t } = useApp();
   const [filterType, setFilterType] = useState<'all' | 'series' | 'live'>('all');
 
-  const items = MOCK_CONTENT.filter((c) => myList.includes(c.id));
+  const items = MOCK_CONTENT.filter((c) => myList.includes(c.id)).map((c) => getLocalizedContent(c, language));
   const filtered = items.filter((c) => {
     if (filterType === 'all') return true;
     return c.type === filterType;
@@ -21,22 +22,22 @@ export const MyListView: React.FC = () => {
         <div>
           <h1 className="font-display text-2xl sm:text-4xl font-extrabold text-white tracking-tight flex items-center gap-3">
             <Bookmark className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400" />
-            <span>My List</span>
+            <span>{t('mylist.title')}</span>
             <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-purple-600/30 text-purple-300 border border-purple-500/40">
-              {items.length} Titles
+              {items.length} {t('profile.titlesSaved')}
             </span>
           </h1>
           <p className="text-slate-400 text-xs sm:text-sm mt-1">
-            Personal watchlist curated across all your devices
+            {t('mylist.subtitle')}
           </p>
         </div>
 
         {/* Filter buttons */}
         <div className="flex items-center p-1 bg-slate-900 rounded-xl border border-white/10 self-start sm:self-auto">
           {[
-            { id: 'all', label: 'All Titles' },
-            { id: 'series', label: 'Series' },
-            { id: 'live', label: 'Live TV' },
+            { id: 'all', label: t('mylist.allTitles') },
+            { id: 'series', label: t('mylist.series') },
+            { id: 'live', label: t('mylist.liveTv') },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -60,23 +61,23 @@ export const MyListView: React.FC = () => {
             <Bookmark className="w-8 h-8" />
           </div>
           <h3 className="font-display text-xl font-bold text-white mb-2">
-            No items in this section
+            {t('mylist.emptySection')}
           </h3>
           <p className="text-slate-400 text-sm mb-6">
-            Browse Onegai Aipri and Channel 0225 TV to add titles to your personal collection.
+            {t('mylist.emptySubtitle')}
           </p>
           <div className="flex justify-center gap-3">
             <button
               onClick={() => setActivePage('series')}
               className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow-md shadow-purple-600/30"
             >
-              Explore Onegai Aipri
+              {t('mylist.exploreSeries')}
             </button>
             <button
               onClick={() => setActivePage('live')}
               className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-white/10 transition-all"
             >
-              Channel 0225 TV Live
+              {t('mylist.channelLive')}
             </button>
           </div>
         </div>

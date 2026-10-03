@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ContentItem, LiveChannel, PageView, ToastMessage, UserProfile, Episode, VideoServer } from '../types';
 import { MOCK_CONTENT, MOCK_CHANNELS } from '../data/mockContent';
+import { Language, TRANSLATIONS, SUPPORTED_LANGUAGES, getLocalizedContent } from '../i18n/translations';
 
 export interface ActivePlaybackState {
   title: string;
@@ -49,6 +50,11 @@ interface AppContextType {
   openDetails: (contentId: string) => void;
   openPlayer: (contentId: string, episodeId?: string) => void;
   signOut: () => void;
+  // Language & i18n
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  isRtl: boolean;
+  t: (key: string, params?: Record<string, string | number>) => string;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -70,6 +76,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [userName, setUserNameState] = useState<string>(() => {
     return localStorage.getItem('streamlay_user_name') || '';
   });
+
+  const [language, setLanguageState] = useState<Language>(() => {
+    const saved = localStorage.getItem('streamlay_language') as Language;
+    if (saved && (saved === 'en' || saved === 'fr' || saved === 'ar')) {
+      return saved;
+    }
+    return 'en';
+  });
+
+  const isRtl = language === 'ar';
+
+  const t = (key: string, params?: Record<string, string | number>): string => {
+    const dict = TRANSLATIONS[language] || TRANSLATIONS.en;
+    let text = dict[key] || TRANSLATIONS.en[key] || key;
+    if (params) {
+      Object.entries(params).forEach(([pKey, pVal]) => {
+        text = text.replace(new RegExp(`\\{${pKey}\\}`, 'g'), String(pVal));
+      });
+    }
+    return text;
+  };
+
+  const setLanguage = (lang: Language) => {
+    setLanguageState(lang);
+    localStorage.setItem('streamlay_language', lang);
+    const langObj = SUPPORTED_LANGUAGES.find((l) => l.code === lang);
+    if (langObj) {
+      setUserProfile((prev) => ({ ...prev, language: langObj.nativeName }));
+    }
+    addToast(t('toast.languageChanged', { name: langObj?.nativeName || lang }), 'success');
+  };
+
+  useEffect(() => {
+    document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
+    document.documentElement.lang = language;
+  }, [language, isRtl]);
 
   const [activePage, setActivePage] = useState<PageView>(() => {
     const savedName = localStorage.getItem('streamlay_user_name');
@@ -202,10 +244,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (exists) {
       setMyList((prev) => prev.filter((id) => id !== contentId));
-      addToast(`Removed "${title}" from My List`, 'info');
+      addToast(t('toast.removedFromList', { title }), 'info');
     } else {
       setMyList((prev) => [contentId, ...prev]);
-      addToast(`Added "${title}" to My List`, 'success');
+      addToast(t('toast.addedToList', { title }), 'success');
     }
   };
 
@@ -218,10 +260,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (exists) {
       setFavoriteChannels((prev) => prev.filter((id) => id !== channelId));
-      addToast(`Removed ${name} from favorites`, 'info');
+      addToast(t('toast.removedFavChannel', { name }), 'info');
     } else {
       setFavoriteChannels((prev) => [...prev, channelId]);
-      addToast(`Added ${name} to favorite channels`, 'success');
+      addToast(t('toast.addedFavChannel', { name }), 'success');
     }
   };
 
@@ -239,7 +281,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const removeFromContinueWatching = (contentId: string) => {
     setContinueWatching((prev) => prev.filter((item) => item.contentId !== contentId));
-    addToast('Removed from Continue Watching', 'info');
+    addToast(t('toast.removedContinue'), 'info');
   };
 
   const updateUserProfile = (updates: Partial<UserProfile>) => {
@@ -247,7 +289,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (updates.name) {
       setUserNameState(updates.name);
     }
-    addToast('Profile preferences updated', 'success');
+    addToast(t('toast.profileUpdated'), 'success');
   };
 
   const openDetails = (contentId: string) => {
@@ -313,7 +355,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         currentServer: server.name
       };
     });
-    addToast(`Switched server to ${server.name}`, 'info');
+    addToast(t('toast.switchedServer', { name: server.name }), 'info');
   };
 
   const startLivePlayback = (channel: LiveChannel) => {
@@ -341,10 +383,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setUserProfile((prev) => ({ ...prev, name: '' }));
     setActivePlayback(null);
     setActivePage('onboarding');
-    addToast('Signed out of StreamLay Plus', 'info');
+    addToast(t('toast.signedOut'), 'info');
   };
 
-  const selectedContent = selectedContentId
+  const rawSelectedContent = selectedContentId
     ? MOCK_CONTENT.find((c) => c.id === selectedContentId) ||
       (() => {
         const ch = MOCK_CHANNELS.find((c) => c.id === selectedContentId);
@@ -375,9 +417,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return item;
       })()
     : null;
+
+  const selectedContent = rawSelectedContent ? getLocalizedContent(rawSelectedContent, language) : null;
+
   const selectedEpisode =
     selectedContent && selectedEpisodeId && selectedContent.seasons
-      ? selectedContent.seasons.flatMap((s) => s.episodes).find((e) => e.id === selectedEpisodeId) || null
+      ? selectedContent.seasons.flatMap((s: any) => s.episodes).find((e: any) => e.id === selectedEpisodeId) || null
       : null;
 
   return (
@@ -415,6 +460,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         openDetails,
         openPlayer,
         signOut,
+        language,
+        setLanguage,
+        isRtl,
+        t,
       }}
     >
       {children}

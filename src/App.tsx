@@ -17,12 +17,12 @@ import { ProfileView } from './components/profile/ProfileView';
 import { MyListView } from './components/mylist/MyListView';
 
 const MainAppContent: React.FC = () => {
-  const { activePage } = useApp();
+  const { activePage, isRtl } = useApp();
 
   // If in onboarding, render fullscreen onboarding without top/bottom bars
   if (activePage === 'onboarding') {
     return (
-      <main className="min-h-screen bg-[#07090e]">
+      <main dir={isRtl ? 'rtl' : 'ltr'} className="min-h-screen bg-[#07090e]">
         <CustomCursor />
         <OnboardingView />
         <ToastContainer />
@@ -33,7 +33,7 @@ const MainAppContent: React.FC = () => {
   // If in video player mode, render fullscreen video player
   if (activePage === 'player') {
     return (
-      <main className="fixed inset-0 bg-black z-50">
+      <main dir={isRtl ? 'rtl' : 'ltr'} className="fixed inset-0 bg-black z-50">
         <CustomCursor />
         <VideoPlayerView />
         <ToastContainer />
@@ -42,7 +42,7 @@ const MainAppContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#07090e] text-slate-100 relative">
+    <div dir={isRtl ? 'rtl' : 'ltr'} className="min-h-screen flex flex-col bg-[#07090e] text-slate-100 relative">
       {/* Interactive Web Cursor Pointer */}
       <CustomCursor />
 

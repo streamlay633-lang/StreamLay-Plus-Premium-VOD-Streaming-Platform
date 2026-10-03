@@ -14,6 +14,7 @@ import {
   Film,
   Tv,
   ArrowLeft,
+  ArrowRight,
   Volume2,
   Sparkles,
   Layers,
@@ -31,21 +32,25 @@ export const ContentDetailsView: React.FC = () => {
     toggleMyList,
     isInMyList,
     setActivePage,
-    addToast
+    addToast,
+    isRtl,
+    t
   } = useApp();
 
   const [selectedSeasonNumber, setSelectedSeasonNumber] = useState<number>(1);
   const [copiedLink, setCopiedLink] = useState(false);
 
+  const BackIcon = isRtl ? ArrowRight : ArrowLeft;
+
   if (!selectedContent) {
     return (
       <div className="min-h-screen pt-28 pb-20 flex flex-col items-center justify-center text-center px-4">
-        <h2 className="text-xl font-bold text-white mb-2">No title selected</h2>
+        <h2 className="text-xl font-bold text-white mb-2">{t('details.noTitleSelected')}</h2>
         <button
           onClick={() => setActivePage('home')}
           className="px-4 py-2 rounded-xl bg-purple-600 text-white font-medium text-sm"
         >
-          Return to Home
+          {t('action.returnHome')}
         </button>
       </div>
     );
@@ -72,7 +77,7 @@ export const ContentDetailsView: React.FC = () => {
   const handleShare = () => {
     navigator.clipboard?.writeText?.(window.location.href);
     setCopiedLink(true);
-    addToast(`Link to "${selectedContent.title}" copied to clipboard!`, 'success');
+    addToast(t('toast.linkCopied', { title: selectedContent.title }), 'success');
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
@@ -97,17 +102,23 @@ export const ContentDetailsView: React.FC = () => {
 
         {/* Cinematic Scrims */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#07090e] via-[#07090e]/70 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#07090e] via-[#07090e]/80 to-transparent w-full md:w-3/4" />
+        <div
+          className={`absolute inset-0 z-10 w-full md:w-3/4 ${
+            isRtl
+              ? 'bg-gradient-to-l from-[#07090e] via-[#07090e]/80 to-transparent'
+              : 'bg-gradient-to-r from-[#07090e] via-[#07090e]/80 to-transparent'
+          }`}
+        />
         <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-[#07090e]/80 to-transparent pointer-events-none" />
 
         {/* Back Navigation Button */}
-        <div className="absolute top-20 left-4 sm:left-8 z-30 flex items-center gap-3">
+        <div className={`absolute top-20 z-30 flex items-center gap-3 ${isRtl ? 'right-4 sm:right-8' : 'left-4 sm:left-8'}`}>
           <button
             onClick={() => setActivePage(isLive ? 'live' : 'home')}
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 hover:bg-black/90 text-slate-300 hover:text-white border border-white/15 text-xs font-semibold backdrop-blur-md transition-all active:scale-95"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>{isLive ? 'Back to Live TV' : 'Back to Browse'}</span>
+            <BackIcon className="w-3.5 h-3.5" />
+            <span>{isLive ? t('action.backToLive') : t('action.backToBrowse')}</span>
           </button>
         </div>
 
@@ -119,12 +130,12 @@ export const ContentDetailsView: React.FC = () => {
               {isLive ? (
                 <span className="flex items-center gap-2 text-rose-400 font-extrabold bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/30">
                   <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-                  Live Broadcast Channel · Active 24/7
+                  {t('details.liveChannelBadge')}
                 </span>
               ) : isSeries ? (
-                <span>StreamLay Original Series</span>
+                <span>{t('details.originalSeries')}</span>
               ) : (
-                <span>StreamLay Feature Film</span>
+                <span>{t('details.featureFilm')}</span>
               )}
             </div>
 
@@ -147,11 +158,11 @@ export const ContentDetailsView: React.FC = () => {
               <span aria-hidden="true" className="text-slate-500">·</span>
               <span>
                 {isLive ? (
-                  <span className="text-emerald-400 font-bold uppercase tracking-wider">24/7 Live Feed</span>
+                  <span className="text-emerald-400 font-bold uppercase tracking-wider">24/7 {t('label.live')}</span>
                 ) : selectedContent.type === 'movie' ? (
                   selectedContent.duration
                 ) : (
-                  `${selectedContent.seasonsCount || 1} Season${(selectedContent.seasonsCount || 1) > 1 ? 's' : ''}`
+                  `${selectedContent.seasonsCount || 1} ${(selectedContent.seasonsCount || 1) > 1 ? t('label.seasons') : t('label.seasonSingular')}`
                 )}
               </span>
               {selectedContent.subtitles && selectedContent.subtitles.length > 0 && (
@@ -182,14 +193,14 @@ export const ContentDetailsView: React.FC = () => {
                 onClick={handlePlayLiveOrVod}
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm shadow-xl shadow-purple-600/40 hover:scale-105 active:scale-95 transition-all"
               >
-                <Play className="w-4 h-4 fill-white" />
-                <span>{isLive ? 'Watch Live Stream' : 'Play Now'}</span>
+                <Play className={`w-4 h-4 fill-white ${isRtl ? 'mr-0.5' : 'ml-0.5'}`} />
+                <span>{isLive ? t('action.watchLive') : t('action.playNow')}</span>
               </button>
 
               {/* Direct Server Selector if multiple servers exist */}
               {selectedContent.servers && selectedContent.servers.length > 1 && (
                 <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/60 border border-white/15 backdrop-blur-md">
-                  <span className="text-[11px] text-slate-400 font-semibold px-2 hidden sm:inline">Server:</span>
+                  <span className="text-[11px] text-slate-400 font-semibold px-2 hidden sm:inline">{t('label.server')}:</span>
                   {selectedContent.servers.map((srv) => (
                     <button
                       key={srv.id}
@@ -210,7 +221,7 @@ export const ContentDetailsView: React.FC = () => {
                   className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-black/60 hover:bg-black/80 border border-white/20 text-slate-200 hover:text-white text-sm font-semibold transition-all active:scale-95 backdrop-blur-md"
                 >
                   <Tv className="w-4 h-4 text-purple-400" />
-                  <span>Open in Live TV</span>
+                  <span>{t('nav.liveTv')}</span>
                 </button>
               )}
 
@@ -223,7 +234,7 @@ export const ContentDetailsView: React.FC = () => {
                 }`}
               >
                 {inWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                <span>{inWatchlist ? 'In My List' : 'Add to My List'}</span>
+                <span>{inWatchlist ? t('action.inMyList') : t('action.addToMyList')}</span>
               </button>
 
               <button
@@ -231,7 +242,7 @@ export const ContentDetailsView: React.FC = () => {
                 className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-black/60 hover:bg-black/80 border border-white/20 text-slate-300 hover:text-white text-sm font-semibold transition-all active:scale-95"
               >
                 <Share2 className="w-4 h-4" />
-                <span>{copiedLink ? 'Copied!' : 'Share'}</span>
+                <span>{copiedLink ? t('action.copied') : t('action.share')}</span>
               </button>
             </div>
           </div>
@@ -255,29 +266,31 @@ export const ContentDetailsView: React.FC = () => {
             {/* Spec Sheet */}
             <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-5 space-y-3.5 text-xs text-slate-300">
               <div>
-                <span className="text-slate-400 block mb-0.5">Genres</span>
-                <span className="font-semibold text-white">{selectedContent.genres.join(', ')}</span>
+                <span className="text-slate-400 block mb-0.5">{t('label.genres')}</span>
+                <span className="font-semibold text-white">
+                  {selectedContent.genres.map((g) => t(`genre.${g}`) || g).join(', ')}
+                </span>
               </div>
               {selectedContent.releaseDate && (
                 <div className="border-t border-white/5 pt-2.5">
-                  <span className="text-slate-400 block mb-0.5">Released Date</span>
+                  <span className="text-slate-400 block mb-0.5">{t('label.releaseDate')}</span>
                   <span className="font-semibold text-white">{selectedContent.releaseDate}</span>
                 </div>
               )}
               <div className="border-t border-white/5 pt-2.5">
-                <span className="text-slate-400 block mb-0.5">Age Rating</span>
+                <span className="text-slate-400 block mb-0.5">{t('label.ageRating')}</span>
                 <span className="font-semibold text-white">{selectedContent.rating}</span>
               </div>
               <div className="border-t border-white/5 pt-2.5">
-                <span className="text-slate-400 block mb-0.5">Director / Studio</span>
+                <span className="text-slate-400 block mb-0.5">{t('label.directorStudio')}</span>
                 <span className="font-semibold text-white">{selectedContent.director}</span>
               </div>
               <div className="border-t border-white/5 pt-2.5">
-                <span className="text-slate-400 block mb-0.5">Starring Cast</span>
+                <span className="text-slate-400 block mb-0.5">{t('label.starringCast')}</span>
                 <span className="font-semibold text-white">{selectedContent.cast.join(', ')}</span>
               </div>
               <div className="border-t border-white/5 pt-2.5">
-                <span className="text-slate-400 block mb-0.5">Audio & Subtitles</span>
+                <span className="text-slate-400 block mb-0.5">{t('label.audioSubtitles')}</span>
                 <span className="font-semibold text-white">
                   {selectedContent.language}
                   {selectedContent.subtitles && selectedContent.subtitles.length > 0
@@ -287,7 +300,7 @@ export const ContentDetailsView: React.FC = () => {
               </div>
               {selectedContent.servers && selectedContent.servers.length > 0 ? (
                 <div className="border-t border-white/5 pt-2.5">
-                  <span className="text-slate-400 block mb-1">Streaming Servers</span>
+                  <span className="text-slate-400 block mb-1">{t('label.streamingServers')}</span>
                   <div className="flex flex-wrap gap-1.5">
                     {selectedContent.servers.map((srv) => (
                       <span
@@ -302,7 +315,7 @@ export const ContentDetailsView: React.FC = () => {
                 </div>
               ) : selectedContent.serverName ? (
                 <div className="border-t border-white/5 pt-2.5">
-                  <span className="text-slate-400 block mb-0.5">Streaming Server</span>
+                  <span className="text-slate-400 block mb-0.5">{t('label.server')}</span>
                   <span className="inline-flex items-center gap-1.5 font-semibold text-purple-300">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     {selectedContent.serverName}
@@ -310,7 +323,7 @@ export const ContentDetailsView: React.FC = () => {
                 </div>
               ) : null}
               <div className="border-t border-white/5 pt-2.5 flex items-center justify-between">
-                <span className="text-slate-400">Stream Quality</span>
+                <span className="text-slate-400">{t('label.streamQuality')}</span>
                 <div className="flex gap-1">
                   {selectedContent.quality.map((q) => (
                     <span key={q} className="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] text-purple-300 font-bold border border-white/10">
@@ -325,7 +338,7 @@ export const ContentDetailsView: React.FC = () => {
           {/* Right Column: Synopsis & Episode Browser (8 cols) */}
           <div className="lg:col-span-8">
             <div className="mb-8">
-              <h3 className="font-display text-lg font-bold text-white mb-2">Synopsis</h3>
+              <h3 className="font-display text-lg font-bold text-white mb-2">{t('details.synopsis')}</h3>
               <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
                 {selectedContent.longDescription || selectedContent.description}
               </p>
@@ -337,12 +350,12 @@ export const ContentDetailsView: React.FC = () => {
                 <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-5">
                   <h3 className="font-display text-xl font-bold text-white flex items-center gap-2">
                     <Layers className="w-5 h-5 text-purple-400" />
-                    Episodes
+                    {t('details.episodes')}
                   </h3>
 
                   {/* Season Selector */}
                   <div className="flex items-center gap-2">
-                    <label className="text-xs text-slate-400 font-medium">Season:</label>
+                    <label className="text-xs text-slate-400 font-medium">{t('label.season')}:</label>
                     <select
                       value={selectedSeasonNumber}
                       onChange={(e) => setSelectedSeasonNumber(Number(e.target.value))}
@@ -373,7 +386,10 @@ export const ContentDetailsView: React.FC = () => {
                             alt={ep.title}
                             referrerPolicy="no-referrer"
                             onError={(e) => {
-                              if (selectedContent?.backdropUrl) {
+                              const match = ep.id.match(/onegai-aipri-s1-e(\d+)/);
+                              if (match && !e.currentTarget.src.includes(`onegai_aipri_ep${match[1]}.jpg`)) {
+                                e.currentTarget.src = `/assets/images/onegai_aipri_ep${match[1]}.jpg`;
+                              } else if (selectedContent?.backdropUrl) {
                                 e.currentTarget.src = selectedContent.backdropUrl;
                               }
                             }}
@@ -381,7 +397,7 @@ export const ContentDetailsView: React.FC = () => {
                           />
                           <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 flex items-center justify-center transition-all">
                             <div className="w-9 h-9 rounded-full bg-purple-600/90 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                              <Play className="w-4 h-4 fill-white ml-0.5" />
+                              <Play className={`w-4 h-4 fill-white ${isRtl ? 'mr-0.5' : 'ml-0.5'}`} />
                             </div>
                           </div>
                           {ep.progress !== undefined && ep.progress > 0 && (
@@ -411,7 +427,7 @@ export const ContentDetailsView: React.FC = () => {
                           {/* Quick Server Switchers for Episode */}
                           {ep.servers && ep.servers.length > 0 && (
                             <div className="flex items-center gap-1.5 flex-wrap pt-1" onClick={(e) => e.stopPropagation()}>
-                              <span className="text-[10px] text-slate-500 font-semibold uppercase">Play on:</span>
+                              <span className="text-[10px] text-slate-500 font-semibold uppercase">{t('details.playOn')}</span>
                               {ep.servers.map((srv) => (
                                 <button
                                   key={srv.id}
@@ -439,9 +455,9 @@ export const ContentDetailsView: React.FC = () => {
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <h3 className="font-display text-xl font-bold text-white flex items-center gap-2">
                     <Radio className="w-5 h-5 text-rose-500 animate-pulse" />
-                    Live Program Schedule
+                    {t('details.liveSchedule')}
                   </h3>
-                  <span className="text-xs text-slate-400 font-medium">Updated Real-Time</span>
+                  <span className="text-xs text-slate-400 font-medium">{t('details.updatedRealTime')}</span>
                 </div>
 
                 {/* On Air Now Banner */}
@@ -450,14 +466,14 @@ export const ContentDetailsView: React.FC = () => {
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         <span className="px-2 py-0.5 rounded bg-rose-600 text-white text-[10px] font-bold tracking-wider uppercase animate-pulse">
-                          ON AIR NOW
+                          {t('label.onAirNow')}
                         </span>
                         <span className="text-xs text-purple-300 font-semibold">
                           {liveChannel?.currentProgramTime || 'Live 24/7'}
                         </span>
                       </div>
                       <h4 className="font-display text-lg sm:text-xl font-bold text-white mb-1">
-                        {liveChannel?.currentProgram || selectedContent.title + ' Live Broadcast'}
+                        {liveChannel?.currentProgram || selectedContent.title}
                       </h4>
                       <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
                         {liveChannel?.currentProgramDesc || selectedContent.description}
@@ -468,8 +484,8 @@ export const ContentDetailsView: React.FC = () => {
                       onClick={handlePlayLiveOrVod}
                       className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-purple-600/30 hover:scale-105 active:scale-95 transition-all shrink-0"
                     >
-                      <Play className="w-4 h-4 fill-white" />
-                      <span>Watch Stream</span>
+                      <Play className={`w-4 h-4 fill-white ${isRtl ? 'mr-0.5' : 'ml-0.5'}`} />
+                      <span>{t('action.watchLive')}</span>
                     </button>
                   </div>
                 </div>
@@ -479,7 +495,7 @@ export const ContentDetailsView: React.FC = () => {
                   <div className="space-y-2.5">
                     <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                       <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      Broadcast Timeline
+                      {t('live.broadcastTimeline')}
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {liveChannel.schedule.map((item, idx) => (
@@ -495,7 +511,7 @@ export const ContentDetailsView: React.FC = () => {
                               {item.title}
                             </h5>
                             <span className="text-[11px] text-slate-500">
-                              {item.genre} · {item.durationMinutes} min
+                              {t(`genre.${item.genre}`) || item.genre} · {item.durationMinutes} {t('label.min')}
                             </span>
                           </div>
                         </div>
@@ -509,15 +525,15 @@ export const ContentDetailsView: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <Signal className="w-4 h-4 text-emerald-400 animate-pulse" />
                     <span className="text-slate-300">
-                      Live Stream Status: <span className="text-emerald-400 font-bold">Online & Active</span>
+                      {t('details.liveStatus')} <span className="text-emerald-400 font-bold">{t('label.online')}</span>
                     </span>
                   </div>
                   <div className="flex items-center gap-3 text-slate-400">
-                    <span>Protocol: <strong className="text-white">HLS (.m3u8)</strong></span>
+                    <span>{t('label.protocol')}: <strong className="text-white">HLS (.m3u8)</strong></span>
                     <span>·</span>
-                    <span>Format: <strong className="text-white">1080p FHD</strong></span>
+                    <span>{t('label.format')}: <strong className="text-white">1080p FHD</strong></span>
                     <span>·</span>
-                    <span>Latency: <strong className="text-white">Ultra-Low</strong></span>
+                    <span>{t('label.latency')}: <strong className="text-white">{t('label.ultraLow')}</strong></span>
                   </div>
                 </div>
               </div>
@@ -527,8 +543,8 @@ export const ContentDetailsView: React.FC = () => {
             {similarItems.length > 0 && (
               <div className="mt-10">
                 <ContentCarousel
-                  title="You May Also Like"
-                  subtitle="More entertainment on StreamLay Plus"
+                  title={t('details.youMayAlsoLike')}
+                  subtitle={t('details.moreOnStreamLay')}
                   items={similarItems}
                 />
               </div>

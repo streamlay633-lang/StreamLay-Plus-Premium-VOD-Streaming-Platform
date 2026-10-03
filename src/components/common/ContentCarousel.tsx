@@ -22,10 +22,13 @@ export const ContentCarousel: React.FC<ContentCarouselProps> = ({
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
-      const { scrollLeft, clientWidth } = scrollRef.current;
+      const { clientWidth } = scrollRef.current;
       const scrollAmount = clientWidth * 0.75;
-      scrollRef.current.scrollTo({
-        left: direction === 'left' ? scrollLeft - scrollAmount : scrollLeft + scrollAmount,
+      const isRtl = document.documentElement.dir === 'rtl';
+      // In RTL, left arrow means advancing backwards in logical reading direction
+      const sign = direction === 'left' ? (isRtl ? 1 : -1) : (isRtl ? -1 : 1);
+      scrollRef.current.scrollBy({
+        left: sign * scrollAmount,
         behavior: 'smooth'
       });
     }

@@ -4,14 +4,14 @@ import { PageView } from '../../types';
 import { Home, Search, Tv, Bookmark, User } from 'lucide-react';
 
 export const MobileNav: React.FC = () => {
-  const { activePage, setActivePage } = useApp();
+  const { activePage, setActivePage, t } = useApp();
 
   const items: { label: string; page: PageView; icon: React.FC<{ className?: string }> }[] = [
-    { label: 'Home', page: 'home', icon: Home },
-    { label: 'Search', page: 'search', icon: Search },
-    { label: 'Live TV', page: 'live', icon: Tv },
-    { label: 'My List', page: 'mylist', icon: Bookmark },
-    { label: 'Profile', page: 'profile', icon: User },
+    { label: t('nav.home'), page: 'home', icon: Home },
+    { label: t('nav.search'), page: 'search', icon: Search },
+    { label: t('nav.liveTv'), page: 'live', icon: Tv },
+    { label: t('nav.myList'), page: 'mylist', icon: Bookmark },
+    { label: t('nav.profile'), page: 'profile', icon: User },
   ];
 
   return (

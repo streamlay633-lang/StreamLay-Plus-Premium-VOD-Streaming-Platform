@@ -1,13 +1,13 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { MOCK_CONTENT } from '../../data/mockContent';
-import { Film, Play, Tv, ArrowRight } from 'lucide-react';
+import { Film, Play, Tv, ArrowRight, ArrowLeft } from 'lucide-react';
 
 export const MoviesView: React.FC = () => {
-  const { setActivePage, openPlayer, startLivePlayback } = useApp();
-  const allMovies = MOCK_CONTENT.filter((c) => c.type === 'movie');
+  const { setActivePage, openPlayer, isRtl, t } = useApp();
 
   const onegaiAipri = MOCK_CONTENT.find((c) => c.id === 'onegai-aipri');
+  const BackIcon = isRtl ? ArrowLeft : ArrowRight;
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-24 pb-28">
@@ -17,10 +17,10 @@ export const MoviesView: React.FC = () => {
         </div>
 
         <h1 className="font-display text-2xl font-extrabold text-white mb-2">
-          No Feature Movies
+          {t('movies.noMovies')}
         </h1>
         <p className="text-slate-400 text-sm leading-relaxed mb-6">
-          Feature movies have been removed from the catalog. Enjoy our featured TV series <strong className="text-white">Onegai Aipri</strong> or tune in to <strong className="text-white">Channel 0225 TV</strong> Live!
+          {t('movies.noMoviesDesc')}
         </p>
 
         <div className="space-y-3">
@@ -29,8 +29,8 @@ export const MoviesView: React.FC = () => {
               onClick={() => openPlayer(onegaiAipri.id)}
               className="w-full inline-flex items-center justify-center gap-2 py-3 px-5 rounded-xl font-bold text-white text-sm bg-purple-600 hover:bg-purple-500 shadow-lg shadow-purple-600/30 transition-all active:scale-95"
             >
-              <Play className="w-4 h-4 fill-white" />
-              <span>Watch Onegai Aipri</span>
+              <Play className={`w-4 h-4 fill-white ${isRtl ? 'mr-0.5' : 'ml-0.5'}`} />
+              <span>{t('movies.watchAipri')}</span>
             </button>
           )}
 
@@ -39,15 +39,15 @@ export const MoviesView: React.FC = () => {
             className="w-full inline-flex items-center justify-center gap-2 py-3 px-5 rounded-xl font-semibold text-slate-200 text-sm bg-slate-800 hover:bg-slate-700 border border-white/10 transition-all active:scale-95"
           >
             <Tv className="w-4 h-4 text-rose-400" />
-            <span>Tune in to Channel 0225 TV</span>
+            <span>{t('movies.tuneChannel0225')}</span>
           </button>
 
           <button
             onClick={() => setActivePage('home')}
-            className="w-full text-xs text-slate-400 hover:text-white pt-2 transition-colors flex items-center justify-center gap-1"
+            className="w-full text-xs text-slate-400 hover:text-white pt-2 transition-colors flex items-center justify-center gap-1.5"
           >
-            <span>Return to Home</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <span>{t('action.returnHome')}</span>
+            <BackIcon className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>

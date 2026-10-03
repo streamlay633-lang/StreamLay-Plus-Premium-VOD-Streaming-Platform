@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { MOCK_CONTENT, AVATARS } from '../../data/mockContent';
+import { getLocalizedContent } from '../../i18n/translations';
 import { ContentItem } from '../../types';
 import { ContentCard } from '../common/ContentCard';
 import {
@@ -32,7 +33,11 @@ export const ProfileView: React.FC = () => {
     continueWatching,
     removeFromContinueWatching,
     signOut,
-    addToast
+    addToast,
+    language,
+    setLanguage,
+    isRtl,
+    t
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'overview' | 'mylist' | 'continue' | 'settings'>('overview');
@@ -41,11 +46,12 @@ export const ProfileView: React.FC = () => {
 
   const currentAvatar = AVATARS.find((a) => a.id === userProfile.avatarId) || AVATARS[0];
 
-  const myListItems = MOCK_CONTENT.filter((c) => myList.includes(c.id));
+  const myListItems = MOCK_CONTENT.filter((c) => myList.includes(c.id)).map((c) => getLocalizedContent(c, language));
   const continueItems: ContentItem[] = [];
   for (const cw of continueWatching) {
-    const item = MOCK_CONTENT.find((c) => c.id === cw.contentId);
-    if (item) {
+    const raw = MOCK_CONTENT.find((c) => c.id === cw.contentId);
+    if (raw) {
+      const item = getLocalizedContent(raw, language);
       continueItems.push({ ...item, progress: cw.progress });
     }
   }
@@ -57,7 +63,7 @@ export const ProfileView: React.FC = () => {
     if (tempName.trim()) {
       setUserName(tempName.trim());
       setIsEditingName(false);
-      addToast('Profile name updated!', 'success');
+      addToast(t('toast.profileUpdated') || 'Profile name updated!', 'success');
     }
   };
 
@@ -76,7 +82,7 @@ export const ProfileView: React.FC = () => {
           </div>
 
           {/* Profile details */}
-          <div className="flex-1 text-center sm:text-left">
+          <div className="flex-1 text-center sm:text-left rtl:sm:text-right">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
               {isEditingName ? (
                 <div className="flex items-center gap-2 max-w-sm mx-auto sm:mx-0">
@@ -95,7 +101,7 @@ export const ProfileView: React.FC = () => {
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center justify-center sm:justify-start gap-3">
+                <div className="flex items-center justify-center sm:justify-start rtl:sm:justify-start gap-3">
                   <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                     {userName || 'StreamLay User'}
                   </h1>
@@ -105,7 +111,7 @@ export const ProfileView: React.FC = () => {
                       setIsEditingName(true);
                     }}
                     className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
-                    title="Edit Name"
+                    title={t('action.edit') || 'Edit Name'}
                   >
                     <Edit3 className="w-4 h-4" />
                   </button>
@@ -115,12 +121,12 @@ export const ProfileView: React.FC = () => {
 
             <p className="text-slate-400 text-xs sm:text-sm mb-3">{userProfile.email}</p>
 
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start rtl:sm:justify-start gap-2 text-xs">
               <span className="px-3 py-1 rounded-full bg-purple-600/30 text-purple-300 font-semibold border border-purple-500/40">
                 {userProfile.subscriptionPlan}
               </span>
               <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 font-medium border border-emerald-500/20">
-                Active Member
+                {t('profile.activeMember')}
               </span>
             </div>
           </div>
@@ -132,14 +138,14 @@ export const ProfileView: React.FC = () => {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-rose-950/40 border border-white/10 hover:border-rose-500/40 text-slate-300 hover:text-rose-300 text-xs font-semibold transition-all active:scale-95"
             >
               <LogOut className="w-4 h-4" />
-              <span>Switch / Sign Out</span>
+              <span>{t('profile.switchSignOut')}</span>
             </button>
           </div>
         </div>
 
         {/* Avatar picker strip */}
         <div className="mt-6 pt-5 border-t border-white/10">
-          <span className="text-xs text-slate-400 font-medium block mb-2">Choose Avatar Mood:</span>
+          <span className="text-xs text-slate-400 font-medium block mb-2">{t('profile.chooseAvatarMood')}</span>
           <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1">
             {AVATARS.map((av) => (
               <button
@@ -154,7 +160,7 @@ export const ProfileView: React.FC = () => {
                 <div className={`w-7 h-7 rounded-lg bg-gradient-to-tr ${av.gradient} flex items-center justify-center text-sm`}>
                   {av.icon}
                 </div>
-                <span className="text-xs font-medium text-slate-300 pr-1">{av.label}</span>
+                <span className="text-xs font-medium text-slate-300 px-1">{av.label}</span>
               </button>
             ))}
           </div>
@@ -164,10 +170,10 @@ export const ProfileView: React.FC = () => {
       {/* Tabs navigation */}
       <div className="flex items-center gap-2 border-b border-white/10 pb-3 mb-6 overflow-x-auto no-scrollbar">
         {[
-          { id: 'overview', label: 'Overview', icon: User },
-          { id: 'mylist', label: `My List (${myListItems.length})`, icon: Bookmark },
-          { id: 'continue', label: `Continue Watching (${continueItems.length})`, icon: Clock },
-          { id: 'settings', label: 'Preferences & Settings', icon: Settings },
+          { id: 'overview', label: t('profile.overview'), icon: User },
+          { id: 'mylist', label: `${t('profile.myList')} (${myListItems.length})`, icon: Bookmark },
+          { id: 'continue', label: `${t('profile.continueWatching')} (${continueItems.length})`, icon: Clock },
+          { id: 'settings', label: t('profile.preferencesSettings'), icon: Settings },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -196,18 +202,18 @@ export const ProfileView: React.FC = () => {
             <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-purple-400">Subscription</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-purple-400">{t('profile.subscription')}</span>
                   <CreditCard className="w-4 h-4 text-slate-400" />
                 </div>
                 <h3 className="font-display text-lg font-bold text-white mb-1">
                   StreamLay Ultra 4K
                 </h3>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  4 Screens simultaneously · 4K UHD + HDR10+ · Dolby Atmos · Spatial Audio
+                  {t('profile.ultraDesc')}
                 </p>
               </div>
               <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
-                <span className="text-slate-400">Renews {userProfile.planRenewalDate}</span>
+                <span className="text-slate-400">{t('profile.renews')} {userProfile.planRenewalDate}</span>
                 <span className="text-purple-400 font-bold">$19.99/mo</span>
               </div>
             </div>
@@ -215,22 +221,23 @@ export const ProfileView: React.FC = () => {
             <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">Content Stored</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">{t('profile.contentStored')}</span>
                   <Bookmark className="w-4 h-4 text-slate-400" />
                 </div>
                 <h3 className="font-display text-lg font-bold text-white mb-1">
-                  {myListItems.length} Titles Saved
+                  {myListItems.length} {t('profile.titlesSaved')}
                 </h3>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  {favoriteSeries.length} Television Series · {favoriteLive.length} Live Channels
+                  {favoriteSeries.length} {t('profile.televisionSeries')} · {favoriteLive.length} {t('profile.liveChannels')}
                 </p>
               </div>
               <div className="pt-3 border-t border-white/5">
                 <button
                   onClick={() => setActiveTab('mylist')}
-                  className="text-xs text-purple-400 hover:text-purple-300 font-semibold"
+                  className="text-xs text-purple-400 hover:text-purple-300 font-semibold inline-flex items-center gap-1"
                 >
-                  View My List →
+                  <span>{t('profile.viewMyList')}</span>
+                  <span>{isRtl ? '←' : '→'}</span>
                 </button>
               </div>
             </div>
@@ -238,22 +245,23 @@ export const ProfileView: React.FC = () => {
             <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-pink-400">Audio & Visuals</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-pink-400">{t('profile.audioVisuals')}</span>
                   <Shield className="w-4 h-4 text-slate-400" />
                 </div>
                 <h3 className="font-display text-lg font-bold text-white mb-1">
-                  Ultra HD Ready
+                  {t('profile.ultraHdReady')}
                 </h3>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  Language: {userProfile.language} · Audio: {userProfile.audioLanguage}
+                  {t('profile.displayLanguage')}: {language.toUpperCase()} · {t('profile.defaultAudioLanguage')}: {userProfile.audioLanguage}
                 </p>
               </div>
               <div className="pt-3 border-t border-white/5">
                 <button
                   onClick={() => setActiveTab('settings')}
-                  className="text-xs text-purple-400 hover:text-purple-300 font-semibold"
+                  className="text-xs text-purple-400 hover:text-purple-300 font-semibold inline-flex items-center gap-1"
                 >
-                  Adjust Preferences →
+                  <span>{t('profile.adjustPreferences')}</span>
+                  <span>{isRtl ? '←' : '→'}</span>
                 </button>
               </div>
             </div>
@@ -265,13 +273,13 @@ export const ProfileView: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
                   <Clock className="w-4 h-4 text-purple-400" />
-                  Jump Back In
+                  {t('profile.jumpBackIn')}
                 </h3>
                 <button
                   onClick={() => setActiveTab('continue')}
                   className="text-xs text-purple-400 hover:text-purple-300 font-semibold"
                 >
-                  See all ({continueItems.length})
+                  {t('profile.seeAll')} ({continueItems.length})
                 </button>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -288,13 +296,13 @@ export const ProfileView: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
                   <Bookmark className="w-4 h-4 text-indigo-400" />
-                  Recently Added to List
+                  {t('profile.recentlyAdded')}
                 </h3>
                 <button
                   onClick={() => setActiveTab('mylist')}
                   className="text-xs text-purple-400 hover:text-purple-300 font-semibold"
                 >
-                  See all ({myListItems.length})
+                  {t('profile.seeAll')} ({myListItems.length})
                 </button>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -312,19 +320,19 @@ export const ProfileView: React.FC = () => {
         <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-display text-xl font-bold text-white">
-              My Watchlist ({myListItems.length})
+              {t('profile.myWatchlist')} ({myListItems.length})
             </h2>
             <div className="text-xs text-slate-400">
-              {favoriteSeries.length} Series · {favoriteLive.length} Live Channels
+              {favoriteSeries.length} {t('profile.televisionSeries')} · {favoriteLive.length} {t('profile.liveChannels')}
             </div>
           </div>
 
           {myListItems.length === 0 ? (
             <div className="p-12 text-center rounded-2xl bg-slate-900/50 border border-white/5 max-w-md mx-auto">
               <Bookmark className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-              <h3 className="font-display text-lg font-bold text-white mb-1">Your list is empty</h3>
+              <h3 className="font-display text-lg font-bold text-white mb-1">{t('profile.emptyListTitle')}</h3>
               <p className="text-xs text-slate-400 mb-4">
-                Explore Onegai Aipri and Channel 0225 TV, and click the "+" button to save titles for later.
+                {t('profile.emptyListDesc')}
               </p>
             </div>
           ) : (
@@ -342,17 +350,17 @@ export const ProfileView: React.FC = () => {
         <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-display text-xl font-bold text-white">
-              Continue Watching ({continueItems.length})
+              {t('profile.continueWatching')} ({continueItems.length})
             </h2>
-            <span className="text-xs text-slate-400">Synced across all your devices</span>
+            <span className="text-xs text-slate-400">{t('profile.syncedAcrossDevices')}</span>
           </div>
 
           {continueItems.length === 0 ? (
             <div className="p-12 text-center rounded-2xl bg-slate-900/50 border border-white/5 max-w-md mx-auto">
               <Clock className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-              <h3 className="font-display text-lg font-bold text-white mb-1">No in-progress titles</h3>
+              <h3 className="font-display text-lg font-bold text-white mb-1">{t('profile.noInProgressTitle')}</h3>
               <p className="text-xs text-slate-400 mb-4">
-                When you pause a movie or episode, it will automatically appear here.
+                {t('profile.noInProgressDesc')}
               </p>
             </div>
           ) : (
@@ -379,15 +387,15 @@ export const ProfileView: React.FC = () => {
                       {item.title}
                     </h4>
                     <p className="text-xs text-purple-400 font-medium">
-                      {item.progress}% completed
+                      {item.progress}% {t('profile.completed')}
                     </p>
-                    <span className="text-[11px] text-slate-500">{item.type === 'movie' ? 'Movie' : 'Series'}</span>
+                    <span className="text-[11px] text-slate-500">{item.type === 'movie' ? t('details.featureFilm') : t('details.originalSeries')}</span>
                   </div>
 
                   <button
                     onClick={() => removeFromContinueWatching(item.id)}
                     className="p-2 text-slate-400 hover:text-rose-400 transition-colors"
-                    title="Remove from history"
+                    title={t('profile.removeFromHistory')}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -402,34 +410,36 @@ export const ProfileView: React.FC = () => {
       {activeTab === 'settings' && (
         <div className="max-w-2xl bg-slate-900/80 border border-white/10 rounded-2xl p-6 sm:p-8 space-y-6">
           <h2 className="font-display text-xl font-bold text-white pb-3 border-b border-white/10">
-            Playback & Experience Settings
+            {t('profile.playbackExperienceSettings')}
           </h2>
 
           <div className="space-y-4 text-xs sm:text-sm">
             {/* Display Language */}
             <div className="flex items-center justify-between gap-4">
               <div>
-                <span className="font-semibold text-white block">Display Language</span>
-                <span className="text-xs text-slate-400">Controls interface buttons, text, and menus</span>
+                <span className="font-semibold text-white block">{t('profile.displayLanguage')}</span>
+                <span className="text-xs text-slate-400">{t('profile.displayLanguageDesc')}</span>
               </div>
               <select
-                value={userProfile.language}
-                onChange={(e) => updateUserProfile({ language: e.target.value })}
-                className="bg-slate-800 text-slate-200 border border-white/10 rounded-lg px-3 py-1.5 focus:outline-none focus:border-purple-500 text-xs"
+                value={language}
+                onChange={(e) => {
+                  const newLang = e.target.value as 'en' | 'fr' | 'ar';
+                  setLanguage(newLang);
+                  updateUserProfile({ language: newLang === 'ar' ? 'Arabic (العربية)' : newLang === 'fr' ? 'French (Français)' : 'English (US)' });
+                }}
+                className="bg-slate-800 text-slate-200 border border-white/10 rounded-lg px-3 py-1.5 focus:outline-none focus:border-purple-500 text-xs font-medium cursor-pointer"
               >
-                <option value="English (US)">English (US)</option>
-                <option value="Spanish (Español)">Spanish (Español)</option>
-                <option value="French (Français)">French (Français)</option>
-                <option value="German (Deutsch)">German (Deutsch)</option>
-                <option value="Japanese (日本語)">Japanese (日本語)</option>
+                <option value="en">English (US)</option>
+                <option value="fr">Français (French)</option>
+                <option value="ar">العربية (Arabic)</option>
               </select>
             </div>
 
             {/* Audio Track Language */}
             <div className="flex items-center justify-between gap-4 pt-4 border-t border-white/5">
               <div>
-                <span className="font-semibold text-white block">Default Audio Language</span>
-                <span className="text-xs text-slate-400">Preferred soundtrack when starting playback</span>
+                <span className="font-semibold text-white block">{t('profile.defaultAudioLanguage')}</span>
+                <span className="text-xs text-slate-400">{t('profile.defaultAudioLanguageDesc')}</span>
               </div>
               <select
                 value={userProfile.audioLanguage}
@@ -437,8 +447,8 @@ export const ProfileView: React.FC = () => {
                 className="bg-slate-800 text-slate-200 border border-white/10 rounded-lg px-3 py-1.5 focus:outline-none focus:border-purple-500 text-xs"
               >
                 <option value="English Original (Dolby Atmos)">English Original (Dolby Atmos)</option>
-                <option value="Spanish (Español)">Spanish (Español)</option>
                 <option value="French (Français)">French (Français)</option>
+                <option value="Arabic (العربية)">Arabic (العربية)</option>
                 <option value="Japanese (日本語)">Japanese (日本語)</option>
               </select>
             </div>
@@ -446,8 +456,8 @@ export const ProfileView: React.FC = () => {
             {/* Subtitles Language */}
             <div className="flex items-center justify-between gap-4 pt-4 border-t border-white/5">
               <div>
-                <span className="font-semibold text-white block">Default Subtitles</span>
-                <span className="text-xs text-slate-400">Closed captions automatically enabled</span>
+                <span className="font-semibold text-white block">{t('profile.defaultSubtitles')}</span>
+                <span className="text-xs text-slate-400">{t('profile.defaultSubtitlesDesc')}</span>
               </div>
               <select
                 value={userProfile.subtitleLanguage}
@@ -455,8 +465,8 @@ export const ProfileView: React.FC = () => {
                 className="bg-slate-800 text-slate-200 border border-white/10 rounded-lg px-3 py-1.5 focus:outline-none focus:border-purple-500 text-xs"
               >
                 <option value="English [CC]">English [CC]</option>
-                <option value="Spanish">Spanish</option>
-                <option value="French">French</option>
+                <option value="French">French (Français)</option>
+                <option value="Arabic">Arabic (العربية)</option>
                 <option value="Off">Off</option>
               </select>
             </div>
@@ -464,8 +474,8 @@ export const ProfileView: React.FC = () => {
             {/* Autoplay Next Episode */}
             <div className="flex items-center justify-between gap-4 pt-4 border-t border-white/5">
               <div>
-                <span className="font-semibold text-white block">Autoplay Next Episode</span>
-                <span className="text-xs text-slate-400">Automatically play the next chapter in a series</span>
+                <span className="font-semibold text-white block">{t('profile.autoplayNextEpisode')}</span>
+                <span className="text-xs text-slate-400">{t('profile.autoplayNextEpisodeDesc')}</span>
               </div>
               <button
                 onClick={() => updateUserProfile({ autoPlayNext: !userProfile.autoPlayNext })}
@@ -475,7 +485,7 @@ export const ProfileView: React.FC = () => {
               >
                 <div
                   className={`w-5 h-5 rounded-full bg-white transition-transform ${
-                    userProfile.autoPlayNext ? 'translate-x-6' : 'translate-x-0'
+                    userProfile.autoPlayNext ? (isRtl ? '-translate-x-6' : 'translate-x-6') : 'translate-x-0'
                   }`}
                 />
               </button>
@@ -484,8 +494,8 @@ export const ProfileView: React.FC = () => {
             {/* Notifications */}
             <div className="flex items-center justify-between gap-4 pt-4 border-t border-white/5">
               <div>
-                <span className="font-semibold text-white block">Product & Release Alerts</span>
-                <span className="text-xs text-slate-400">Receive alerts when new seasons drop</span>
+                <span className="font-semibold text-white block">{t('profile.releaseAlerts')}</span>
+                <span className="text-xs text-slate-400">{t('profile.releaseAlertsDesc')}</span>
               </div>
               <button
                 onClick={() => updateUserProfile({ notificationsEnabled: !userProfile.notificationsEnabled })}
@@ -495,7 +505,7 @@ export const ProfileView: React.FC = () => {
               >
                 <div
                   className={`w-5 h-5 rounded-full bg-white transition-transform ${
-                    userProfile.notificationsEnabled ? 'translate-x-6' : 'translate-x-0'
+                    userProfile.notificationsEnabled ? (isRtl ? '-translate-x-6' : 'translate-x-6') : 'translate-x-0'
                   }`}
                 />
               </button>

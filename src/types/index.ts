@@ -19,6 +19,8 @@ export interface Episode {
   progress?: number;
   videoUrl: string;
   servers?: VideoServer[];
+  releaseDate?: string;
+  isNew?: boolean;
 }
 
 export interface Season {

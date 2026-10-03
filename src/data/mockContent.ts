@@ -55,6 +55,7 @@ export const MOCK_CONTENT: ContentItem[] = [
             seasonNumber: 1,
             title: 'Please! Become an AiPri!',
             duration: '24:20',
+            releaseDate: 'Apr 5, 2026',
             description:
               'Himari enters Private Paradime Academy and dreams of making thousands of friends. An unexpected encounter leads her to the secret virtual world of AiPri Verse, where her idol journey begins!',
             thumbnailUrl:
@@ -82,6 +83,7 @@ export const MOCK_CONTENT: ContentItem[] = [
             seasonNumber: 1,
             title: "Let's make that dream come true♪",
             duration: '24:30',
+            releaseDate: 'Apr 12, 2026',
             description:
               "Himari continues her dazzling idol journey in AiPri Verse alongside Mitsuki. Striving together on the radiant stage, they take their next steps to make everyone's sparkling dreams come true♪",
             thumbnailUrl:
@@ -98,6 +100,64 @@ export const MOCK_CONTENT: ContentItem[] = [
                 id: 'doodstream',
                 name: 'DoodStream',
                 url: 'https://playmogo.com/e/6fj07ncr9pia',
+                quality: 'Fast Stream'
+              }
+            ],
+            progress: 0
+          },
+          {
+            id: 'onegai-aipri-s1-e3',
+            episodeNumber: 3,
+            seasonNumber: 1,
+            title: 'The only big love',
+            duration: '24:30',
+            releaseDate: 'Apr 19, 2026',
+            isNew: true,
+            description:
+              'Himari steps onto the AiPri Verse stage to express her true feelings and share her passion with everyone. Pouring her heart into every note, she delivers the one and only big love to all her cherished friends!',
+            thumbnailUrl:
+              '/assets/images/onegai_aipri_ep3.jpg',
+            videoUrl: 'https://lulust.com/e/91s3sfo5qv52',
+            servers: [
+              {
+                id: 'lulustream',
+                name: 'LuluStream',
+                url: 'https://lulust.com/e/91s3sfo5qv52',
+                quality: '1080p FHD'
+              },
+              {
+                id: 'doodstream',
+                name: 'DoodStream',
+                url: 'https://playmogo.com/e/0zoe3g5esjy8',
+                quality: 'Fast Stream'
+              }
+            ],
+            progress: 0
+          },
+          {
+            id: 'onegai-aipri-s1-e4',
+            episodeNumber: 4,
+            seasonNumber: 1,
+            title: 'Our friend is an AiPri?!',
+            duration: '24:30',
+            releaseDate: 'Apr 26, 2026',
+            isNew: true,
+            description:
+              'Surprises unfold at Private Paradime Academy as rumors swirl and friends start suspecting the true identities behind the newest AiPri idol sensations. Can Himari and Mitsuki protect their secret while shining on stage?!',
+            thumbnailUrl:
+              '/assets/images/onegai_aipri_ep4.jpg',
+            videoUrl: 'https://lulust.com/e/jvdeid0aj8zo',
+            servers: [
+              {
+                id: 'lulustream',
+                name: 'LuluStream',
+                url: 'https://lulust.com/e/jvdeid0aj8zo',
+                quality: '1080p FHD'
+              },
+              {
+                id: 'doodstream',
+                name: 'DoodStream',
+                url: 'https://playmogo.com/e/qurxses453wt',
                 quality: 'Fast Stream'
               }
             ],
